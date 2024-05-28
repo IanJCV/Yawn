@@ -3,379 +3,368 @@
 #include "filesystem"
 #include <DirectXTK/SimpleMath.h>
 #include <DirectXTK/CommonStates.h>
+#include <imgui/imgui_impl_dx11.h>
+#include <imgui/imgui_impl_win32.h>
 
-using namespace DirectX;
-using namespace SimpleMath;
+#include "audio.h"
 
-API Device* device;
-API DeviceContext* deviceContext;
-API SwapChain* swapChain;
-API RenderTargetView* renderTarget;
-API DepthTargetView* depthTarget;
 
-API ID3D11DepthStencilState* depthState;
-
-API ID3D11RasterizerState* rasterizerState;
-
-API ShaderBlob* vsBlob;
-API ShaderBlob* psBlob;
-API ShaderBlob* error_blob;
-
-API VertexShader* vertexShader;
-API PixelShader* pixelShader;
-
-API void DirectXSetup(HWND hwnd)
+namespace engine
 {
-    // Init DX11
-    DXGI_SWAP_CHAIN_DESC swap_chain_descr = { 0 };
-    swap_chain_descr.BufferDesc.RefreshRate.Numerator = 0;
-    swap_chain_descr.BufferDesc.RefreshRate.Denominator = 1;
-    swap_chain_descr.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-    swap_chain_descr.SampleDesc.Count = 1;
-    swap_chain_descr.SampleDesc.Quality = 0;
-    swap_chain_descr.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    swap_chain_descr.BufferCount = 1;
-    swap_chain_descr.OutputWindow = hwnd;
-    swap_chain_descr.Windowed = true;
+	using namespace DirectX;
+	using namespace SimpleMath;
 
-    D3D_FEATURE_LEVEL feature_level;
-    D3D_FEATURE_LEVEL feature_levels[] =
-    {
-        D3D_FEATURE_LEVEL_11_1
-    };
+	ENGINE_API DeviceContext* immediateContext;
+	ENGINE_API DeviceContext* deferredContext;
+	ENGINE_API SwapChain* swapChain;
+	ENGINE_API RenderTargetView* renderTarget;
+	ENGINE_API DepthTargetView* depthTarget;
 
-    UINT flags = D3D11_CREATE_DEVICE_SINGLETHREADED;
+	ENGINE_API ID3D11DepthStencilState* depthState;
 
-    IDXGIFactory1* factory;
-    CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**)(&factory));
+	ENGINE_API ID3D11RasterizerState* rasterizerState;
 
-    UINT i = 0;
-    IDXGIAdapter1* pAdapter;
-    std::vector <IDXGIAdapter1*> vAdapters;
-    while (factory->EnumAdapters1(i, &pAdapter) != DXGI_ERROR_NOT_FOUND)
-    {
-        vAdapters.push_back(pAdapter);
+	ENGINE_API ShaderBlob* vsBlob;
+	ENGINE_API ShaderBlob* psBlob;
+	ENGINE_API ShaderBlob* error_blob;
+	ENGINE_API VertexShader* vertexShader;
+	ENGINE_API PixelShader* pixelShader;
 
-        DXGI_ADAPTER_DESC1 desc;
-        HRESULT h = pAdapter->GetDesc1(&desc);
-        assert(SUCCEEDED(h));
-        DebugOut(L"Adapter %d found: name: %s\n", i, desc.Description);
+	ENGINE_API DirectX::Mouse mouse;
+	ENGINE_API DirectX::Keyboard keyboard;
+	ENGINE_API void DirectXSetup(HWND hwnd)
+	{
+		// Init DX11
+		DXGI_SWAP_CHAIN_DESC swap_chain_descr = { 0 };
+		swap_chain_descr.BufferDesc.RefreshRate.Numerator = 0;
+		swap_chain_descr.BufferDesc.RefreshRate.Denominator = 1;
+		swap_chain_descr.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+		swap_chain_descr.SampleDesc.Count = 1;
+		swap_chain_descr.SampleDesc.Quality = 0;
+		swap_chain_descr.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		swap_chain_descr.BufferCount = 1;
+		swap_chain_descr.OutputWindow = hwnd;
+		swap_chain_descr.Windowed = true;
 
-        ++i;
-    }
+		D3D_FEATURE_LEVEL feature_level;
+		D3D_FEATURE_LEVEL feature_levels[] =
+		{
+			D3D_FEATURE_LEVEL_11_1
+		};
 
-    HRESULT hr = D3D11CreateDeviceAndSwapChain(
-        NULL,
-        D3D_DRIVER_TYPE_HARDWARE,
-        NULL,
-        flags,
-        feature_levels,
-        ARRAYSIZE(feature_levels),
-        D3D11_SDK_VERSION,
-        &swap_chain_descr,
-        &swapChain,
-        &device,
-        &feature_level,
-        &deviceContext);
+		UINT flags = D3D11_CREATE_DEVICE_SINGLETHREADED;
 
-    assert(S_OK == hr && swapChain && device && deviceContext);
+		IDXGIFactory1* factory;
+		CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**)(&factory));
 
-    DebugOut(L"feature level: %d\n", feature_level);
+		UINT i = 0;
+		IDXGIAdapter1* pAdapter;
+		std::vector <IDXGIAdapter1*> vAdapters;
+		while (factory->EnumAdapters1(i, &pAdapter) != DXGI_ERROR_NOT_FOUND)
+		{
+			vAdapters.push_back(pAdapter);
 
-    // create a framebuffer
-    Texture2D* framebuffer;
-    hr = swapChain->GetBuffer(
-        0,
-        __uuidof(Texture2D),
-        (void**)&framebuffer);
-    assert(SUCCEEDED(hr));
+			DXGI_ADAPTER_DESC1 desc;
+			HRESULT h = pAdapter->GetDesc1(&desc);
+			assert(SUCCEEDED(h));
+			DebugOut(L"Adapter %d found: name: %s\n", i, desc.Description);
 
-    hr = device->CreateRenderTargetView(
-        framebuffer, 0, &renderTarget);
-    assert(SUCCEEDED(hr));
-    framebuffer->Release();
+			++i;
+		}
 
-    // resize
-    D3D11_TEXTURE2D_DESC desc;
-    framebuffer->GetDesc(&desc);
-    g_WindowWidth = desc.Width;
-    g_WindowHeight = desc.Height;
+		HRESULT hr = D3D11CreateDeviceAndSwapChain(
+			NULL,
+			D3D_DRIVER_TYPE_HARDWARE,
+			NULL,
+			flags,
+			feature_levels,
+			ARRAYSIZE(feature_levels),
+			D3D11_SDK_VERSION,
+			&swap_chain_descr,
+			&swapChain,
+			&device,
+			&feature_level,
+			&immediateContext);
 
-    std::unique_ptr<CommonStates> states(new CommonStates(device));
+		assert(S_OK == hr && swapChain && device && immediateContext);
 
-    deviceContext->OMSetBlendState(states->Opaque(), Color(0, 0, 0, 0), 0xFFFFFFFF);
-    deviceContext->OMSetDepthStencilState(states->DepthDefault(), 0);
+		//hr = device->CreateDeferredContext(0, &deferredContext);
 
-    rasterizerState = states->CullClockwise();
-    deviceContext->RSSetState(rasterizerState);
+		//assert(SUCCEEDED(hr));
 
-    auto samplerState = states->LinearWrap();
-    deviceContext->PSSetSamplers(0, 1, &samplerState);
+		DebugOut(L"feature level: %d\n", feature_level);
 
-    D3D11_TEXTURE2D_DESC depthTextureDesc;
-    ZeroMemory(&depthTextureDesc, sizeof(depthTextureDesc));
-    depthTextureDesc.Width = desc.Width;
-    depthTextureDesc.Height = desc.Height;
-    depthTextureDesc.MipLevels = 1;
-    depthTextureDesc.ArraySize = 1;
-    depthTextureDesc.SampleDesc.Count = 1;
-    depthTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    depthTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+		// create a framebuffer
+		Texture2D* framebuffer;
+		hr = swapChain->GetBuffer(
+			0,
+			__uuidof(Texture2D),
+			(void**)&framebuffer);
+		assert(SUCCEEDED(hr));
 
-    ID3D11Texture2D* DepthStencilTexture;
-    hr = device->CreateTexture2D(&depthTextureDesc, NULL, &DepthStencilTexture);
+		hr = device->CreateRenderTargetView(
+			framebuffer, 0, &renderTarget);
+		assert(SUCCEEDED(hr));
+		framebuffer->Release();
 
-    assert(SUCCEEDED(hr));
+		// resize
+		D3D11_TEXTURE2D_DESC desc;
+		framebuffer->GetDesc(&desc);
+		engine::g_WindowWidth = desc.Width;
+		engine::g_WindowHeight = desc.Height;
 
-    D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
-    ZeroMemory(&dsvDesc, sizeof(dsvDesc));
-    dsvDesc.Format = depthTextureDesc.Format;
-    dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
+		std::unique_ptr<CommonStates> states(new CommonStates(device));
 
-    hr = device->CreateDepthStencilView(DepthStencilTexture, &dsvDesc, &depthTarget);
-    DepthStencilTexture->Release();
+		immediateContext->OMSetBlendState(states->Opaque(), Color(0, 0, 0, 0), 0xFFFFFFFF);
+		immediateContext->OMSetDepthStencilState(states->DepthDefault(), 0);
 
-    assert(SUCCEEDED(hr));
+		rasterizerState = states->CullClockwise();
+		immediateContext->RSSetState(rasterizerState);
+
+		auto samplerState = states->LinearWrap();
+		immediateContext->PSSetSamplers(0, 1, &samplerState);
+
+		D3D11_TEXTURE2D_DESC depthTextureDesc;
+		ZeroMemory(&depthTextureDesc, sizeof(depthTextureDesc));
+		depthTextureDesc.Width = desc.Width;
+		depthTextureDesc.Height = desc.Height;
+		depthTextureDesc.MipLevels = 1;
+		depthTextureDesc.ArraySize = 1;
+		depthTextureDesc.SampleDesc.Count = 1;
+		depthTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		depthTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+
+		ID3D11Texture2D* DepthStencilTexture;
+		hr = device->CreateTexture2D(&depthTextureDesc, NULL, &DepthStencilTexture);
+
+		assert(SUCCEEDED(hr));
+
+		D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
+		ZeroMemory(&dsvDesc, sizeof(dsvDesc));
+		dsvDesc.Format = depthTextureDesc.Format;
+		dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
+
+		hr = device->CreateDepthStencilView(DepthStencilTexture, &dsvDesc, &depthTarget);
+		DepthStencilTexture->Release();
+
+		assert(SUCCEEDED(hr));
 
 
-    if (!ReloadShaders())
-    {
-        DebugOut(L"Initial shader load failed!\n");
-        assert(false);
-    }
-}
+		if (!ReloadShaders())
+		{
+			DebugOut(L"Initial shader load failed!\n");
+			assert(false);
+		}
 
-API bool ReloadShaders()
-{
-    // Shader stuff
-    UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
+		g_DirectXInitialized = true;
+
+		// Setup Dear ImGui context
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO();
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+		ImGui_ImplWin32_Init(hwnd);
+		ImGui_ImplDX11_Init(device, immediateContext);
+	}
+
+	ENGINE_API bool ReloadShaders()
+	{
+		// Shader stuff
+		UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
 #if defined( DEBUG ) || defined( _DEBUG )
-    flags |= D3DCOMPILE_DEBUG; // add more debug output
+		flags |= D3DCOMPILE_DEBUG; // add more debug output
 #endif
 
-    ShaderBlob* tempBlob;
+		ShaderBlob* tempBlob;
 
-    // COMPILE VERTEX SHADER
-    HRESULT hr = D3DCompileFromFile(
-        L"shaders/shaders.hlsl",
-        nullptr,
-        D3D_COMPILE_STANDARD_FILE_INCLUDE,
-        "vs_main",
-        "vs_5_0",
-        flags,
-        0,
-        &tempBlob,
-        &error_blob);
-    if (FAILED(hr)) {
-        if (error_blob) {
-            OutputDebugStringA((char*)error_blob->GetBufferPointer());
-            error_blob->Release();
-        }
-        if (tempBlob) { tempBlob->Release(); }
-        return false;
-    }
+		// COMPILE VERTEX SHADER
+		HRESULT hr = D3DCompileFromFile(
+			L"shaders/shaders.hlsl",
+			nullptr,
+			D3D_COMPILE_STANDARD_FILE_INCLUDE,
+			"vs_main",
+			"vs_5_0",
+			flags,
+			0,
+			&tempBlob,
+			&error_blob);
+		if (FAILED(hr)) {
+			if (error_blob) {
+				OutputDebugStringA((char*)error_blob->GetBufferPointer());
+				error_blob->Release();
+			}
+			if (tempBlob) { tempBlob->Release(); }
+			return false;
+		}
 
-    vsBlob = tempBlob;
+		vsBlob = tempBlob;
 
-    // COMPILE PIXEL SHADER
-    hr = D3DCompileFromFile(
-        L"shaders/shaders.hlsl",
-        nullptr,
-        D3D_COMPILE_STANDARD_FILE_INCLUDE,
-        "ps_main",
-        "ps_5_0",
-        flags,
-        0,
-        &tempBlob,
-        &error_blob);
-    if (FAILED(hr)) {
-        if (error_blob) {
-            OutputDebugStringA((char*)error_blob->GetBufferPointer());
-            error_blob->Release();
-        }
-        if (tempBlob) { tempBlob->Release(); }
-        return false;
-    }
+		// COMPILE PIXEL SHADER
+		hr = D3DCompileFromFile(
+			L"shaders/shaders.hlsl",
+			nullptr,
+			D3D_COMPILE_STANDARD_FILE_INCLUDE,
+			"ps_main",
+			"ps_5_0",
+			flags,
+			0,
+			&tempBlob,
+			&error_blob);
+		if (FAILED(hr)) {
+			if (error_blob) {
+				OutputDebugStringA((char*)error_blob->GetBufferPointer());
+				error_blob->Release();
+			}
+			if (tempBlob) { tempBlob->Release(); }
+			return false;
+		}
 
-    psBlob = tempBlob;
+		psBlob = tempBlob;
 
-    hr = device->CreateVertexShader(
-        vsBlob->GetBufferPointer(),
-        vsBlob->GetBufferSize(),
-        NULL,
-        &vertexShader);
-    assert(SUCCEEDED(hr));
+		hr = device->CreateVertexShader(
+			vsBlob->GetBufferPointer(),
+			vsBlob->GetBufferSize(),
+			NULL,
+			&vertexShader);
+		assert(SUCCEEDED(hr));
 
-    hr = device->CreatePixelShader(
-        psBlob->GetBufferPointer(),
-        psBlob->GetBufferSize(),
-        NULL,
-        &pixelShader);
-    assert(SUCCEEDED(hr));
+		hr = device->CreatePixelShader(
+			psBlob->GetBufferPointer(),
+			psBlob->GetBufferSize(),
+			NULL,
+			&pixelShader);
+		assert(SUCCEEDED(hr));
 
-    return true;
-}
+		return true;
+	}
 
-API void ResizeWindow()
-{
-    deviceContext->OMSetRenderTargets(0, 0, 0);
-    renderTarget->Release();
-    depthTarget->Release();
+	ENGINE_API void ResizeWindow()
+	{
+		immediateContext->OMSetRenderTargets(0, 0, 0);
+		renderTarget->Release();
+		depthTarget->Release();
 
-    // render target
-    HRESULT res = swapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
-    assert(SUCCEEDED(res));
+		// render target
+		HRESULT res = swapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
+		assert(SUCCEEDED(res));
 
-    Texture2D* frameBuffer;
-    res = swapChain->GetBuffer(0, __uuidof(Texture2D), (void**)&frameBuffer);
-    assert(SUCCEEDED(res));
+		Texture2D* frameBuffer;
+		res = swapChain->GetBuffer(0, __uuidof(Texture2D), (void**)&frameBuffer);
+		assert(SUCCEEDED(res));
 
-    res = device->CreateRenderTargetView(frameBuffer, NULL, &renderTarget);
+		res = device->CreateRenderTargetView(frameBuffer, NULL, &renderTarget);
 
-    assert(SUCCEEDED(res));
+		assert(SUCCEEDED(res));
 
-    D3D11_TEXTURE2D_DESC desc;
-    frameBuffer->GetDesc(&desc);
-    DebugOut(L"framebuffer resized: %dx%d\n", desc.Width, desc.Height);
-    g_WindowWidth = desc.Width;
-    g_WindowHeight = desc.Height;
+		D3D11_TEXTURE2D_DESC desc;
+		frameBuffer->GetDesc(&desc);
+		DebugOut(L"framebuffer resized: %dx%d\n", desc.Width, desc.Height);
+		engine::g_WindowWidth = desc.Width;
+		engine::g_WindowHeight = desc.Height;
 
-    frameBuffer->Release();
+		frameBuffer->Release();
 
-    // depth
-    D3D11_TEXTURE2D_DESC depthTextureDesc;
-    ZeroMemory(&depthTextureDesc, sizeof(depthTextureDesc));
-    depthTextureDesc.Width = desc.Width;
-    depthTextureDesc.Height = desc.Height;
-    depthTextureDesc.MipLevels = 1;
-    depthTextureDesc.ArraySize = 1;
-    depthTextureDesc.SampleDesc.Count = 1;
-    depthTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    depthTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+		// depth
+		D3D11_TEXTURE2D_DESC depthTextureDesc;
+		ZeroMemory(&depthTextureDesc, sizeof(depthTextureDesc));
+		depthTextureDesc.Width = desc.Width;
+		depthTextureDesc.Height = desc.Height;
+		depthTextureDesc.MipLevels = 1;
+		depthTextureDesc.ArraySize = 1;
+		depthTextureDesc.SampleDesc.Count = 1;
+		depthTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		depthTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 
-    ID3D11Texture2D* DepthStencilTexture;
-    res = device->CreateTexture2D(&depthTextureDesc, NULL, &DepthStencilTexture);
+		ID3D11Texture2D* DepthStencilTexture;
+		res = device->CreateTexture2D(&depthTextureDesc, NULL, &DepthStencilTexture);
 
-    assert(SUCCEEDED(res));
+		assert(SUCCEEDED(res));
 
-    D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
-    ZeroMemory(&dsvDesc, sizeof(dsvDesc));
-    dsvDesc.Format = depthTextureDesc.Format;
-    dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
+		D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
+		ZeroMemory(&dsvDesc, sizeof(dsvDesc));
+		dsvDesc.Format = depthTextureDesc.Format;
+		dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
 
-    res = device->CreateDepthStencilView(DepthStencilTexture, &dsvDesc, &depthTarget);
-    
-    assert(SUCCEEDED(res));
+		res = device->CreateDepthStencilView(DepthStencilTexture, &dsvDesc, &depthTarget);
 
-    DepthStencilTexture->Release();
-}
+		assert(SUCCEEDED(res));
 
-API void ClearBackground(DirectX::SimpleMath::Color color)
-{
-    deviceContext->ClearRenderTargetView(renderTarget, color);
-    deviceContext->ClearDepthStencilView(depthTarget, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-}
+		DepthStencilTexture->Release();
 
-API Model* LoadModel(const char* filename)
-{
-    if (!std::filesystem::exists(filename))
-    {
-        return nullptr;
-    }
+		Renderer& rend = Renderer::Get();
+		if (rend.camera)
+		{
+			rend.camera->RecalculateProjection();
+		}
+	}
 
-    Model* out;
+	ENGINE_API void ClearBackground(DirectX::SimpleMath::Color color)
+	{
+		immediateContext->ClearRenderTargetView(renderTarget, color);
+		immediateContext->ClearDepthStencilView(depthTarget, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	}
 
-    Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(filename,
-        aiProcess_Triangulate |
-        aiProcess_GenBoundingBoxes);
+	ENGINE_API ImGuiContext* GetImGuiContext()
+	{
+		return ImGui::GetCurrentContext();
+	}
 
-    if (scene == nullptr)
-    {
-        return nullptr;
-    }
+	ENGINE_API bool DoGameLoop(Game& game, float deltaTime)
+	{
+		using namespace std::chrono;
 
-    out = new Model();
+		// Start the Dear ImGui frame
+		ImGui_ImplDX11_NewFrame();
+		ImGui_ImplWin32_NewFrame();
+		ImGui::NewFrame();
 
-    for (size_t i = 0; i < scene->mNumMeshes; i++)
-    {
-        aiMesh* rMesh = scene->mMeshes[i];
-        Mesh* tMesh = new Mesh();
+		bool running = game.Update(deltaTime);
 
-        tMesh->index_count = rMesh->mNumFaces * 3;
+		ClearBackground(Color(0.f, 0.f, 0.f, 0.f));
 
-        tMesh->vertex_count = rMesh->mNumVertices;
-        tMesh->vertex_stride = sizeof(Vertex);
-        tMesh->vertex_offset = 0;
+		D3D11_VIEWPORT viewport = {
+		  0.0f,
+		  0.0f,
+		  float(engine::g_WindowWidth),
+		  float(engine::g_WindowHeight),
+		  0.0f,
+		  1.0f };
 
-        std::vector<Vertex> verts;
+		immediateContext->RSSetViewports(1, &viewport);
+		immediateContext->RSSetState(rasterizerState);
+		immediateContext->OMSetRenderTargets(1, &renderTarget, depthTarget);
+		immediateContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-        for (size_t v = 0; v < rMesh->mNumVertices; v++)
-        {
-            aiVector3D pos = rMesh->mVertices[v];
-            aiVector3D norm = rMesh->mNormals[v];
+		auto rend = engine::Renderer::Get();
 
-            aiColor4D color = aiColor4D(0.f, 0.f, 0.f, 0.f);
-            if (rMesh->HasVertexColors(0))
-            {
-				color = rMesh->mColors[0][v];
-            }
+		rend.SetContext(&immediateContext);
+		rend.PreUpdate();
 
-            aiVector3D texcoord = rMesh->mTextureCoords[0][v];
+		game.Render(rend, ImGui::GetCurrentContext(), deltaTime);
 
-            verts.push_back(Vertex(Vector3(pos.x, pos.y, pos.z), Vector3(norm.x, norm.y, norm.z), Color(color.r, color.g, color.b, color.a), Vector2(texcoord.x, texcoord.y)));
-        }
+		ImGui::Render();
+		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
-        uint32_t* indices = new uint32_t[rMesh->mNumFaces * 3];
+		swapChain->Present(1, 0);
 
-        AABB aabb;
-        auto min = rMesh->mAABB.mMin;
-        aabb.min = Vector3(min.x, min.y, min.z);
+		Mouse::Get().EndOfInputFrame();
 
-        auto max = rMesh->mAABB.mMax;
-        aabb.max = Vector3(max.x, max.y, max.z);
+		audio::fmodSystem->update();
 
-        tMesh->boundingBox = aabb;
+		return true;
+	}
 
-        for (size_t f = 0; f < rMesh->mNumFaces; f++)
-        {
-            aiFace face = rMesh->mFaces[f];
-            for (size_t fi = 0; fi < face.mNumIndices; fi++)
-            {
-                indices[(f * 3) + fi] = face.mIndices[fi];
-            }
-        }
+	ENGINE_API void DoGameSetup()
+	{
 
-        D3D11_BUFFER_DESC vertexBufferDesc = {};
-        vertexBufferDesc.ByteWidth = verts.size() * sizeof(Vertex);
-        vertexBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
-        vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	}
 
-        D3D11_SUBRESOURCE_DATA subresourceData = { verts.data()};
-
-
-        HRESULT hResult = device->CreateBuffer(&vertexBufferDesc, &subresourceData, &tMesh->vBuffer);
-        assert(SUCCEEDED(hResult));
-
-
-        D3D11_BUFFER_DESC indexBufferDesc = {};
-        indexBufferDesc.ByteWidth = tMesh->index_count * sizeof(uint32_t);
-        indexBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
-        indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-
-        D3D11_SUBRESOURCE_DATA indexSubresourceData = { indices };
-
-        hResult = device->CreateBuffer(&indexBufferDesc, &indexSubresourceData, &tMesh->iBuffer);
-        assert(SUCCEEDED(hResult));
-
-        out->meshes.push_back(tMesh);
-        out->meshCount++;
-
-        out->vBuffers.push_back(tMesh->vBuffer);
-        out->iBuffers.push_back(tMesh->iBuffer);
-        out->strides.push_back(tMesh->vertex_stride);
-        out->offsets.push_back(tMesh->vertex_offset);
-    }
-
-    return out;
+	ENGINE_API void EngineShutdown()
+	{
+		ImGui_ImplDX11_Shutdown();
+		ImGui_ImplWin32_Shutdown();
+		ImGui::DestroyContext();
+	}
 }

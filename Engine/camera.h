@@ -8,14 +8,16 @@ namespace engine
 		using namespace DirectX::SimpleMath;
 	}
 
-	class API Camera
+	class ENGINE_API Camera
 	{
 	public:
 		Camera(Vector3 position, Quaternion rotation);
 
 		void SetFOV(float deg);
 
-		void Update(Vector3 movement, Vector2 rotation);
+		void RecalculateProjection();
+
+		void Update(float dt, Vector3 movement, Vector2 rotation);
 
 		Matrix Transform(Matrix model);
 
@@ -24,9 +26,10 @@ namespace engine
 		Vector3 Right;
 		Matrix Projection;
 		Matrix View;
-	private:
 		float Pitch = 0.f;
 		float Yaw = 0.f;
 		float Sensitivity = 0.002f;
+		float FOV = 90.f;
+	private:
 	};
 }

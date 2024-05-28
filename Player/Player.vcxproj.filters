@@ -15,7 +15,7 @@
     <Filter Include="shaders">
       <UniqueIdentifier>{da5b468a-8c9d-445d-8892-072edae3a1f9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\DirectXTK">
+    <Filter Include="Header Files\DirectXTK">
       <UniqueIdentifier>{0c92c62e-9af1-40c5-8730-a2da8e576c16}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -54,16 +54,16 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\common\include\DirectXTK\Keyboard.cpp">
-      <Filter>Source Files\DirectXTK</Filter>
+      <Filter>Header Files\DirectXTK</Filter>
     </ClCompile>
     <ClCompile Include="..\common\include\DirectXTK\Mouse.cpp">
-      <Filter>Source Files\DirectXTK</Filter>
+      <Filter>Header Files\DirectXTK</Filter>
     </ClCompile>
     <ClCompile Include="..\common\include\DirectXTK\VertexTypes.cpp">
-      <Filter>Source Files\DirectXTK</Filter>
+      <Filter>Header Files\DirectXTK</Filter>
     </ClCompile>
     <ClCompile Include="..\common\include\DirectXTK\SimpleMath.cpp">
-      <Filter>Source Files\DirectXTK</Filter>
+      <Filter>Header Files\DirectXTK</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

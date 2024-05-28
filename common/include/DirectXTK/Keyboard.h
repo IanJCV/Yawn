@@ -519,6 +519,8 @@ namespace DirectX
         // Singleton
         static Keyboard& __cdecl Get();
 
+        static void __cdecl Set(Keyboard* kb);
+
     private:
         // Private implementation.
         class Impl;

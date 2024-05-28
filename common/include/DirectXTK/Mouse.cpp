@@ -1622,6 +1622,11 @@ Mouse& Mouse::Get()
     return *Impl::s_mouse->mOwner;
 }
 
+void __cdecl DirectX::Mouse::Set(Mouse* ms)
+{
+    Impl::s_mouse = ms->pImpl.get();
+}
+
 
 
 //======================================================================================

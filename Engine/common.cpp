@@ -1,6 +1,6 @@
 #include "common.h"
 
-API void DebugOut(const wchar_t* fmt, ...)
+ENGINE_API void DebugOut(const wchar_t* fmt, ...)
 {
     va_list argp;
     va_start(argp, fmt);
@@ -10,7 +10,7 @@ API void DebugOut(const wchar_t* fmt, ...)
     OutputDebugString(dbg_out);
 }
 
-API std::wstring get_utf16(const std::string& str)
+ENGINE_API std::wstring get_utf16(const std::string& str)
 {
     if (str.empty()) return std::wstring();
     int sz = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), 0, 0);
@@ -19,12 +19,12 @@ API std::wstring get_utf16(const std::string& str)
     return res;
 }
 
-API constexpr float d2r(float deg)
+ENGINE_API constexpr float d2r(float deg)
 {
     return DEG2RAD * deg;
 }
 
-API float deg2rad(float deg)
+ENGINE_API float deg2rad(float deg)
 {
     return DEG2RAD * deg;
 }

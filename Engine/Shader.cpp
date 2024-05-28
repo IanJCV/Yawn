@@ -18,11 +18,11 @@ inline bool engine::Shader::Load(const wchar_t* vsFile, const wchar_t* psFile, D
     flags |= D3DCOMPILE_DEBUG; // add more debug output
 #endif
 
-    ShaderBlob* tempBlob;
+    ShaderBlob* tempBlob = NULL;
 
     // COMPILE VERTEX SHADER
     HRESULT hr = D3DCompileFromFile(
-        L"shaders/shaders.hlsl",
+        vsFile,
         nullptr,
         D3D_COMPILE_STANDARD_FILE_INCLUDE,
         "vs_main",
@@ -44,7 +44,7 @@ inline bool engine::Shader::Load(const wchar_t* vsFile, const wchar_t* psFile, D
 
     // COMPILE PIXEL SHADER
     hr = D3DCompileFromFile(
-        L"shaders/shaders.hlsl",
+        psFile,
         nullptr,
         D3D_COMPILE_STANDARD_FILE_INCLUDE,
         "ps_main",
@@ -86,7 +86,7 @@ inline bool engine::Shader::Load(const wchar_t* vsFile, const wchar_t* psFile, D
         return false;
     }
 
-    HRESULT hr = device->CreateInputLayout(
+    hr = device->CreateInputLayout(
         Vertex::InputElements,
         Vertex::InputElementCount,
         vsBlob->GetBufferPointer(),
@@ -97,4 +97,23 @@ inline bool engine::Shader::Load(const wchar_t* vsFile, const wchar_t* psFile, D
     {
         return false;
     }
+
+    vsName = vsFile;
+    psName = psFile;
+
+    lastDevice = device;
+
+    return true;
+}
+
+void engine::Shader::Reload()
+{
+	errorBlob->Release();
+	vsBlob->Release();
+	psBlob->Release();
+	inputLayout->Release();
+	vertexShader->Release();
+	pixelShader->Release();
+
+    Load(vsName, psName, lastDevice);
 }

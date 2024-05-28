@@ -159,6 +159,8 @@ namespace DirectX
         // Singleton
         static Mouse& __cdecl Get();
 
+        static void __cdecl Set(Mouse* ms);
+
     private:
         // Private implementation.
         class Impl;

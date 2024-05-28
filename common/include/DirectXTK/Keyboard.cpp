@@ -648,6 +648,11 @@ Keyboard& Keyboard::Get()
     return *Impl::s_keyboard->mOwner;
 }
 
+void DirectX::Keyboard::Set(Keyboard* kb)
+{
+    Impl::s_keyboard = kb->pImpl.get();
+}
+
 
 
 //======================================================================================

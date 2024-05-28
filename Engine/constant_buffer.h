@@ -1,7 +1,7 @@
 #pragma once
 #include "common.h"
 
-class API ConstantBuffer
+class ENGINE_API ConstantBuffer
 {
 public:
 	ConstantBuffer(ID3D11Device* device, size_t size);

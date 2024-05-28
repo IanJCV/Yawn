@@ -117,7 +117,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;DLLCOMPILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_LIB;ENGINE_DLLCOMPILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -143,7 +143,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_LIB;DLLCOMPILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;ENGINE_DLLCOMPILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -165,36 +165,66 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\common\include\DirectXTK\Keyboard.h" />
+    <ClInclude Include="..\common\include\DirectXTK\Mouse.h" />
+    <ClInclude Include="..\common\include\imgui\imconfig.h" />
+    <ClInclude Include="..\common\include\imgui\imgui.h" />
+    <ClInclude Include="..\common\include\imgui\imgui_impl_dx11.h" />
+    <ClInclude Include="..\common\include\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="..\common\include\imgui\imgui_internal.h" />
+    <ClInclude Include="..\common\include\imgui\imgui_stdlib.h" />
+    <ClInclude Include="..\common\include\imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\common\include\imgui\imstb_textedit.h" />
+    <ClInclude Include="..\common\include\imgui\imstb_truetype.h" />
     <ClInclude Include="audio.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="common.h" />
     <ClInclude Include="constant_buffer.h" />
     <ClInclude Include="engine.h" />
+    <ClInclude Include="game.h" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Shader.h" />
+    <ClInclude Include="rendering.h" />
+    <ClInclude Include="scene.h" />
+    <ClInclude Include="shader.h" />
     <ClInclude Include="stbi_image.h" />
+    <ClInclude Include="world.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\include\DirectXTK\CommonStates.cpp" />
     <ClCompile Include="..\common\include\DirectXTK\DirectXHelpers.cpp" />
+    <ClCompile Include="..\common\include\DirectXTK\Keyboard.cpp" />
+    <ClCompile Include="..\common\include\DirectXTK\Mouse.cpp" />
     <ClCompile Include="..\common\include\DirectXTK\SimpleMath.cpp" />
     <ClCompile Include="..\common\include\DirectXTK\VertexTypes.cpp" />
+    <ClCompile Include="..\common\include\imgui\imgui.cpp" />
+    <ClCompile Include="..\common\include\imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\common\include\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\common\include\imgui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="..\common\include\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="..\common\include\imgui\imgui_stdlib.cpp" />
+    <ClCompile Include="..\common\include\imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\common\include\imgui\imgui_widgets.cpp" />
     <ClCompile Include="audio.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="common.cpp" />
     <ClCompile Include="constant_buffer.cpp" />
     <ClCompile Include="engine.cpp" />
+    <ClCompile Include="game.cpp" />
+    <ClCompile Include="globals.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="rendering.cpp" />
+    <ClCompile Include="scene.cpp" />
+    <ClCompile Include="shader.cpp" />
     <ClCompile Include="stbi_image.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="world.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\fmodstudio.dll">

@@ -108,12 +108,13 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;GAME_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;GAME_EXPORTS;GAME_DLLCOMPILE;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)Engine;$(SolutionDir)common/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -128,7 +129,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;GAME_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;GAME_EXPORTS;GAME_DLLCOMPILE;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -142,28 +143,42 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\common\include\imgui\imconfig.h" />
+    <ClInclude Include="..\common\include\imgui\imgui.h" />
+    <ClInclude Include="..\common\include\imgui\imgui_impl_dx11.h" />
+    <ClInclude Include="..\common\include\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="..\common\include\imgui\imgui_internal.h" />
+    <ClInclude Include="..\common\include\imgui\imgui_stdlib.h" />
+    <ClInclude Include="..\common\include\imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\common\include\imgui\imstb_textedit.h" />
+    <ClInclude Include="..\common\include\imgui\imstb_truetype.h" />
     <ClInclude Include="debugscene.h" />
-    <ClInclude Include="game.h" />
+    <ClInclude Include="game_common.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="scene.h" />
-    <ClInclude Include="world.h" />
+    <ClInclude Include="TestGame.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\include\DirectXTK\DirectXHelpers.cpp" />
     <ClCompile Include="..\common\include\DirectXTK\Keyboard.cpp" />
     <ClCompile Include="..\common\include\DirectXTK\Mouse.cpp" />
     <ClCompile Include="..\common\include\DirectXTK\SimpleMath.cpp" />
+    <ClCompile Include="..\common\include\imgui\imgui.cpp" />
+    <ClCompile Include="..\common\include\imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\common\include\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\common\include\imgui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="..\common\include\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="..\common\include\imgui\imgui_stdlib.cpp" />
+    <ClCompile Include="..\common\include\imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\common\include\imgui\imgui_widgets.cpp" />
     <ClCompile Include="debugscene.cpp" />
     <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="game.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="scene.cpp" />
-    <ClCompile Include="world.cpp" />
+    <ClCompile Include="TestGame.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

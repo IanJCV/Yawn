@@ -3,22 +3,22 @@
 namespace
 {
 	bool bMenuOpen = false;
-	SoundEvent* seClick;
+	engine::audio::SoundEvent* seClick;
 }
 
 void audiotest::Init()
 {
-	if (!global_fmodLoaded)
+	if (!engine::audio::global_fmodLoaded)
 	{
-		InitFMOD();
+		engine::audio::InitFMOD();
 	}
 
-	seClick = new SoundEvent("event:/e_click");
+	seClick = new engine::audio::SoundEvent("event:/e_click");
 }
 
 void audiotest::GUI()
 {
-	if (!global_fmodLoaded)
+	if (!engine::audio::global_fmodLoaded)
 	{
 		return;
 	}
@@ -34,8 +34,8 @@ void audiotest::GUI()
 
 		if (ImGui::Button("Reload"))
 		{
-			masterBank->Reload();
-			stringsBank->Reload();
+			engine::audio::masterBank->Reload();
+			engine::audio::stringsBank->Reload();
 
 			seClick->Reload();
 		}

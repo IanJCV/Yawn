@@ -1,54 +1,58 @@
 #pragma once
 #include "common.h"
 
-class SoundBank;
-class SoundEvent;
 
-// FMOD Globals
-extern API bool global_fmodLoaded;
-extern API FMOD::Studio::System* fmodSystem;
-
-extern API SoundBank* masterBank;
-extern API SoundBank* stringsBank;
-
-using namespace FMOD;
-
-API void InitFMOD();
-
-API void DestroyFMOD();
-
-class SoundEvent
+namespace engine::audio
 {
-public:
-    API SoundEvent(const char* name);
+    class SoundBank;
+    class SoundEvent;
 
-    API void Play();
+    // FMOD Globals
+    extern ENGINE_API bool global_fmodLoaded;
+    extern ENGINE_API FMOD::Studio::System* fmodSystem;
 
-    API void Reload();
+    extern ENGINE_API SoundBank* masterBank;
+    extern ENGINE_API SoundBank* stringsBank;
 
-    API int GetInstanceCount();
+    using namespace FMOD;
 
-private:
-    void Load(const char* name);
+    ENGINE_API void InitFMOD();
 
-	FMOD::Studio::EventDescription* ev;
-    const char* name;
-};
+    ENGINE_API void DestroyFMOD();
 
-class SoundBank
-{
-public:
-    API SoundBank(const char* name);
+    class SoundEvent
+    {
+    public:
+        ENGINE_API SoundEvent(const char* name);
 
-    API void Load(const char* name);
+        ENGINE_API void Play();
 
-    API void Reload();
+        ENGINE_API void Reload();
 
-    API ~SoundBank();
+        ENGINE_API int GetInstanceCount();
 
-private:
-    void Destroy();
+    private:
+        void Load(const char* name);
 
-    FMOD::Studio::Bank* bank;
-    const char* name;
-};
+        FMOD::Studio::EventDescription* ev;
+        const char* name;
+    };
+
+    class SoundBank
+    {
+    public:
+        ENGINE_API SoundBank(const char* name);
+
+        ENGINE_API void Load(const char* name);
+
+        ENGINE_API void Reload();
+
+        ENGINE_API ~SoundBank();
+
+    private:
+        void Destroy();
+
+        FMOD::Studio::Bank* bank;
+        const char* name;
+    };
+}

@@ -1,66 +1,44 @@
 #pragma once
-#include "pch.h"
-#include "audio.h"
 #include "common.h"
 #include "globals.h"
+#include "game.h"
 
-class API AABB
+namespace engine
 {
-public:
-    DirectX::SimpleMath::Vector3 min;
-    DirectX::SimpleMath::Vector3 max;
-};
 
-class API Mesh
-{
-public:
-    ID3D11Buffer* vBuffer;
-    ID3D11Buffer* iBuffer;
+	// D3D Globals
+	extern ENGINE_API DeviceContext* immediateContext;
+	extern ENGINE_API DeviceContext* deferredContext;
+	extern ENGINE_API SwapChain* swapChain;
+	extern ENGINE_API RenderTargetView* renderTarget;
+	extern ENGINE_API DepthTargetView* depthTarget;
+	extern ENGINE_API ID3D11DepthStencilState* depthState;
 
-    UINT vertex_count;
-    UINT vertex_stride;
-    UINT vertex_offset;
+	extern ENGINE_API ID3D11RasterizerState* rasterizerState;
 
-    UINT index_count;
+	extern ENGINE_API ShaderBlob* vsBlob;
+	extern ENGINE_API ShaderBlob* psBlob;
+	extern ENGINE_API ShaderBlob* error_blob;
+	extern ENGINE_API VertexShader* vertexShader;
+	extern ENGINE_API PixelShader* pixelShader;
 
-    AABB boundingBox;
-};
+	extern ENGINE_API DirectX::Mouse mouse;
+	extern ENGINE_API DirectX::Keyboard keyboard;
 
-class API Model
-{
-public:
-    std::vector<Mesh*> meshes;
-    uint32_t meshCount;
-    ID3D11InputLayout* layout = NULL;
+	inline ENGINE_API bool g_DirectXInitialized;
+	ENGINE_API void DirectXSetup(HWND hwnd);
 
-    std::vector<ID3D11Buffer*> vBuffers;
-    std::vector<UINT> strides;
-    std::vector<UINT> offsets;
-    std::vector<ID3D11Buffer*> iBuffers;
-};
+	ENGINE_API bool ReloadShaders();
 
-// D3D Globals
-extern API Device* device;
-extern API DeviceContext* deviceContext;
-extern API SwapChain* swapChain;
-extern API RenderTargetView* renderTarget;
-extern API DepthTargetView* depthTarget;
-extern API ID3D11DepthStencilState* depthState;
+	ENGINE_API void ResizeWindow();
 
-extern API ID3D11RasterizerState* rasterizerState;
+	ENGINE_API void ClearBackground(DirectX::SimpleMath::Color color);
 
-extern API ShaderBlob* vsBlob;
-extern API ShaderBlob* psBlob;
-extern API ShaderBlob* error_blob;
-extern API VertexShader* vertexShader;
-extern API PixelShader* pixelShader;
+	ENGINE_API void DoGameSetup();
 
-API void DirectXSetup(HWND hwnd);
+	ENGINE_API ImGuiContext* GetImGuiContext();
 
-API bool ReloadShaders();
+	ENGINE_API bool DoGameLoop(Game& game, float dt);
 
-API void ResizeWindow();
-
-API Model* LoadModel(const char* filename);
-
-API void ClearBackground(DirectX::SimpleMath::Color color);
+	ENGINE_API void EngineShutdown();
+}
