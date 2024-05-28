@@ -1,4 +1,6 @@
 #include <engine.h>
+#include <constant_buffer.h>
+#include <game.h>
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_win32.h>
@@ -47,6 +49,7 @@ enum GameAction {
 };
 static bool global_keyIsDown[GameActionCount] = {};
 
+Game game;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -71,30 +74,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     Rid[0].hwndTarget = hwnd;
     RegisterRawInputDevices(Rid, 1, sizeof(Rid[0]));
     
-    OutputDebugString(get_utf16(std::format("Window created, name: {}", "Player")).c_str());
-    DebugOut(L"Window created, name: %s\n", L"Player");
-    
     assert(hwnd != NULL);
 
     DirectXSetup(hwnd);
 
-    ID3D11InputLayout* input_layout_ptr = NULL;
-
-    HRESULT hr = device->CreateInputLayout(
-        Vertex::InputElements,
-        Vertex::InputElementCount,
-        vsBlob->GetBufferPointer(),
-        vsBlob->GetBufferSize(),
-        &input_layout_ptr);
-
-    assert(SUCCEEDED(hr));
-
-    auto p1 = std::chrono::high_resolution_clock::now();
-    Model* icosphere = LoadModel("models/icosphere.fbx");
-    auto p2 = std::chrono::high_resolution_clock::now();
-
-    DebugOut(L"model load time: %dms\n", std::chrono::duration_cast<std::chrono::milliseconds>(p2 - p1));
-
+    game.LoadResources();
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -116,41 +100,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         Color color;
     };
 
-    ID3D11Buffer* constantBuffer;
-    {
-        D3D11_BUFFER_DESC constantBufferDesc = {};
-        // ByteWidth must be a multiple of 16, per the docs
-        constantBufferDesc.ByteWidth = sizeof(Constants);
-        constantBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-        constantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-        constantBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-
-        HRESULT hResult = device->CreateBuffer(&constantBufferDesc, nullptr, &constantBuffer);
-        assert(SUCCEEDED(hResult));
-    }
-
-    //ID3D11RasterizerState* rasterizerState;
-    {
-        D3D11_RASTERIZER_DESC rasterizerDesc = {};
-        rasterizerDesc.FillMode = D3D11_FILL_SOLID;
-        rasterizerDesc.CullMode = D3D11_CULL_BACK;
-        rasterizerDesc.FrontCounterClockwise = TRUE;
-
-        //device->CreateRasterizerState(&rasterizerDesc, &rasterizerState);
-    }
+    ConstantBuffer constBuf(device, sizeof(Constants));
 
     // Audio
     audiotest::Init();
 
     // Camera
-    SimpleMath::Matrix cameraMatrix = SimpleMath::Matrix::CreatePerspectiveFieldOfView(DEG2RAD * 70.0f, global_windowWidth / global_windowHeight, 0.01f, 100.0f);
+    SimpleMath::Matrix cameraMatrix = SimpleMath::Matrix::CreatePerspectiveFieldOfView(DEG2RAD * 70.0f, g_WindowWidth / g_WindowHeight, 0.01f, 100.0f);
     SimpleMath::Vector3 cameraPos = { 0, 0, 2 };
     SimpleMath::Vector3 cameraFwd = { 0, 0, -1 };
     Vector3 cameraRight;
     float cameraPitch = 0.f;
     float cameraYaw = 0.f;
 
-    float cameraSensitivity = 0.1f;
+    float cameraSensitivity = 0.002f;
 
     // Variables
     Color quadColor = Color { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -219,7 +182,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         {
             ResizeWindow();
 
-            projectionMat = Matrix::CreatePerspectiveFieldOfView(d2r(70.0f), float(global_windowWidth) / float(global_windowHeight), 0.01f, 50.0f);
+            projectionMat = Matrix::CreatePerspectiveFieldOfView(d2r(70.0f), float(g_WindowWidth) / float(g_WindowHeight), 0.01f, 50.0f);
 
             global_windowResize = false;
         }
@@ -234,8 +197,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
             if (mState.positionMode == Mouse::MODE_RELATIVE)
 			{
-				cameraPitch -= mState.y * (dt * cameraSensitivity);
-				cameraYaw -= mState.x * (dt * cameraSensitivity);
+				cameraPitch -= float(mState.y) * cameraSensitivity;
+				cameraYaw -= float(mState.x) * cameraSensitivity;
             }
             else
             {
@@ -247,10 +210,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
             cameraRight = m.Right();
 
-            if (cameraPitch > d2r(85))
-                cameraPitch = d2r(85);
-            if (cameraPitch < -d2r(85))
-                cameraPitch = -d2r(85);
+            if (cameraPitch >  d2r(88))
+                cameraPitch =  d2r(88);
+            if (cameraPitch < -d2r(88))
+                cameraPitch = -d2r(88);
 
             SimpleMath::Vector3 camFwdXZ = cameraFwd;
             camFwdXZ.y = 0.0f;
@@ -276,7 +239,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         }
 
         Matrix viewMat = Matrix::CreateLookAt(cameraPos, cameraPos + cameraFwd, Vector3::UnitY);
-        projectionMat = Matrix::CreatePerspectiveFieldOfView(d2r(70.0f), float(global_windowWidth) / float(global_windowHeight), 0.1f, 10.f);
+        projectionMat = Matrix::CreatePerspectiveFieldOfView(d2r(70.0f), float(g_WindowWidth) / float(g_WindowHeight), 0.1f, 10.f);
 
         // Spin the quad
         Matrix modelMat = Matrix::CreateRotationY(0.2f * (float)(PI * currentTimeInSeconds));
@@ -284,17 +247,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         // Calculate model-view-projection matrix to send to shader
         Matrix modelViewProj = modelMat * viewMat * projectionMat;
 
-        // Update constant buffer
-        D3D11_MAPPED_SUBRESOURCE mappedSubresource;
-        deviceContext->Map(constantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
-        Constants* constants = (Constants*)(mappedSubresource.pData);
-        constants->model = modelMat;
-        constants->mvpMatrix = modelViewProj;
-        constants->color = quadColor;
-        deviceContext->Unmap(constantBuffer, 0);
+
+        void* c = nullptr;
+        constBuf.BeginUpdate(deviceContext, &c);
+        Constants* cst = (Constants*)c;
+        cst->model = modelMat;
+        cst->mvpMatrix = modelViewProj;
+        cst->color = quadColor;
+        constBuf.EndUpdate(deviceContext);
 
 
-        // (Your code process and dispatch Win32 messages)
         // Start the Dear ImGui frame
         ImGui_ImplDX11_NewFrame();
         ImGui_ImplWin32_NewFrame();
@@ -315,7 +277,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
             ImGui::Separator();
 
-            ImGui::Text("window size: %dx%d", global_windowWidth, global_windowHeight);
+            ImGui::Text("window size: %dx%d", g_WindowWidth, g_WindowHeight);
             auto state = Mouse::Get().GetState();
             ImGui::Text("mouse: %d, %d", state.x, state.y);
 
@@ -375,7 +337,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         deviceContext->VSSetShader(vertexShader, NULL, 0);
         deviceContext->PSSetShader(pixelShader, NULL, 0);
 
-        deviceContext->VSSetConstantBuffers(0, 1, &constantBuffer);
+        //deviceContext->VSSetConstantBuffers(0, 1, &constantBuffer);
+        constBuf.Use(deviceContext);
 
         deviceContext->IASetInputLayout(input_layout_ptr);
 
@@ -391,7 +354,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         ImGui::Render();
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
-        swapChain->Present(1, 0);
+        swapChain->Present(0, 0);
 
         mouse.EndOfInputFrame();
     }

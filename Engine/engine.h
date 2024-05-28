@@ -2,21 +2,7 @@
 #include "pch.h"
 #include "audio.h"
 #include "common.h"
-
-#include <DirectXTK/VertexTypes.h>
-
-#define Device ID3D11Device
-#define DeviceContext ID3D11DeviceContext
-#define SwapChain IDXGISwapChain
-#define Texture2D ID3D11Texture2D
-#define RenderTargetView ID3D11RenderTargetView
-#define DepthTargetView ID3D11DepthStencilView
-#define ShaderBlob ID3DBlob
-
-#define VertexShader ID3D11VertexShader
-#define PixelShader ID3D11PixelShader
-
-#define Vertex DirectX::VertexPositionNormalColorTexture
+#include "globals.h"
 
 class API AABB
 {
@@ -68,9 +54,6 @@ extern API ShaderBlob* psBlob;
 extern API ShaderBlob* error_blob;
 extern API VertexShader* vertexShader;
 extern API PixelShader* pixelShader;
-
-extern API int global_windowWidth;
-extern API int global_windowHeight;
 
 API void DirectXSetup(HWND hwnd);
 

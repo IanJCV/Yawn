@@ -20,8 +20,8 @@ struct vs_out
     float3 normal : NORMAL;
     float3 normalWS : NORMAL1;
     float4 color : COLOR;
-    float2 texcoord : TEXCOORD;
     float4 color2 : COLOR2;
+    float2 texcoord : TEXCOORD;
     float orient : VFACE;
 };
 
@@ -41,9 +41,8 @@ vs_out vs_main(vs_in input)
 
 float4 ps_main(vs_out input) : SV_TARGET
 {
-    float ndotl = pow(saturate(dot(input.normal, float3(-0.5, 0.5, 0))), 0.1);
-    ndotl = smoothstep(0.05, 0.1, ndotl);
-    float ambient = 0.25;
+    float ndotl = pow(saturate(dot(input.normal, float3(-0.5, 0.5, 0))), 1);
+    float ambient = 0.15;
     float4 light = max(ndotl * input.color2, ambient.rrrr);
     return float4(light);
 }

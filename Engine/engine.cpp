@@ -24,9 +24,6 @@ API ShaderBlob* error_blob;
 API VertexShader* vertexShader;
 API PixelShader* pixelShader;
 
-API int global_windowWidth;
-API int global_windowHeight;
-
 API void DirectXSetup(HWND hwnd)
 {
     // Init DX11
@@ -101,39 +98,8 @@ API void DirectXSetup(HWND hwnd)
     // resize
     D3D11_TEXTURE2D_DESC desc;
     framebuffer->GetDesc(&desc);
-    global_windowWidth = desc.Width;
-    global_windowHeight = desc.Height;
-
-
-    // depth
-    /*
-    D3D11_DEPTH_STENCIL_DESC depthDesc;
-
-    depthDesc.DepthEnable = true;
-    depthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-    depthDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-
-    depthDesc.StencilEnable = true;
-    depthDesc.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;
-    depthDesc.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;
-
-    depthDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-	depthDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
-	depthDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	depthDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-
-    depthDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-    depthDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
-    depthDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-    depthDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-
-    hr = device->CreateDepthStencilState(&depthDesc, &depthState);
-
-    deviceContext->OMSetDepthStencilState(depthState, 0);
-
-    assert(SUCCEEDED(hr));
-    */
-
+    g_WindowWidth = desc.Width;
+    g_WindowHeight = desc.Height;
 
     std::unique_ptr<CommonStates> states(new CommonStates(device));
 
@@ -271,8 +237,8 @@ API void ResizeWindow()
     D3D11_TEXTURE2D_DESC desc;
     frameBuffer->GetDesc(&desc);
     DebugOut(L"framebuffer resized: %dx%d\n", desc.Width, desc.Height);
-    global_windowWidth = desc.Width;
-    global_windowHeight = desc.Height;
+    g_WindowWidth = desc.Width;
+    g_WindowHeight = desc.Height;
 
     frameBuffer->Release();
 

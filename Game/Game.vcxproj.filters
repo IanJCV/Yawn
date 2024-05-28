@@ -13,78 +13,60 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\scenes">
+      <UniqueIdentifier>{9c7ac2b3-582f-415b-9186-3ac9b86987df}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Source Files\DirectXTK">
-      <UniqueIdentifier>{82268b16-a49c-4eb3-bcdb-caa641839521}</UniqueIdentifier>
+      <UniqueIdentifier>{c4d990f7-29e6-480e-a6a7-f0d4a78641c2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="engine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="stbi_image.h">
+    <ClInclude Include="game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="audio.h">
+    <ClInclude Include="world.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="common.h">
+    <ClInclude Include="scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="constant_buffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="globals.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="debugscene.h">
+      <Filter>Header Files\scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="stbi_image.cpp">
+    <ClCompile Include="game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="common.cpp">
+    <ClCompile Include="world.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="engine.cpp">
+    <ClCompile Include="scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="audio.cpp">
+    <ClCompile Include="debugscene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\common\include\DirectXTK\VertexTypes.cpp">
-      <Filter>Source Files\DirectXTK</Filter>
-    </ClCompile>
-    <ClCompile Include="..\common\include\DirectXTK\CommonStates.cpp">
-      <Filter>Source Files\DirectXTK</Filter>
-    </ClCompile>
-    <ClCompile Include="..\common\include\DirectXTK\DirectXHelpers.cpp">
+    <ClCompile Include="..\common\include\DirectXTK\Mouse.cpp">
       <Filter>Source Files\DirectXTK</Filter>
     </ClCompile>
     <ClCompile Include="..\common\include\DirectXTK\SimpleMath.cpp">
       <Filter>Source Files\DirectXTK</Filter>
     </ClCompile>
-    <ClCompile Include="constant_buffer.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\common\include\DirectXTK\DirectXHelpers.cpp">
+      <Filter>Source Files\DirectXTK</Filter>
     </ClCompile>
-    <ClCompile Include="Shader.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\common\include\DirectXTK\Keyboard.cpp">
+      <Filter>Source Files\DirectXTK</Filter>
     </ClCompile>
-    <ClCompile Include="camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="..\common\lib\fmodstudio_vc.lib" />
   </ItemGroup>
 </Project>
