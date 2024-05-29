@@ -14,7 +14,6 @@ namespace engine
 	using namespace DirectX;
 	using namespace SimpleMath;
 
-	ENGINE_API DeviceContext* immediateContext;
 	ENGINE_API DeviceContext* deferredContext;
 	ENGINE_API SwapChain* swapChain;
 	ENGINE_API RenderTargetView* renderTarget;
@@ -34,6 +33,8 @@ namespace engine
 	ENGINE_API DirectX::Keyboard keyboard;
 	ENGINE_API void DirectXSetup(HWND hwnd)
 	{
+		CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+
 		// Init DX11
 		DXGI_SWAP_CHAIN_DESC swap_chain_descr = { 0 };
 		swap_chain_descr.BufferDesc.RefreshRate.Numerator = 0;
@@ -95,10 +96,10 @@ namespace engine
 		DebugOut(L"feature level: %d\n", feature_level);
 
 		// create a framebuffer
-		Texture2D* framebuffer;
+		ID3D11Texture2D* framebuffer;
 		hr = swapChain->GetBuffer(
 			0,
-			__uuidof(Texture2D),
+			__uuidof(ID3D11Texture2D),
 			(void**)&framebuffer);
 		assert(SUCCEEDED(hr));
 
@@ -149,13 +150,6 @@ namespace engine
 
 		assert(SUCCEEDED(hr));
 
-
-		if (!ReloadShaders())
-		{
-			DebugOut(L"Initial shader load failed!\n");
-			assert(false);
-		}
-
 		g_DirectXInitialized = true;
 
 		// Setup Dear ImGui context
@@ -169,77 +163,6 @@ namespace engine
 		ImGui_ImplDX11_Init(device, immediateContext);
 	}
 
-	ENGINE_API bool ReloadShaders()
-	{
-		// Shader stuff
-		UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
-#if defined( DEBUG ) || defined( _DEBUG )
-		flags |= D3DCOMPILE_DEBUG; // add more debug output
-#endif
-
-		ShaderBlob* tempBlob;
-
-		// COMPILE VERTEX SHADER
-		HRESULT hr = D3DCompileFromFile(
-			L"shaders/shaders.hlsl",
-			nullptr,
-			D3D_COMPILE_STANDARD_FILE_INCLUDE,
-			"vs_main",
-			"vs_5_0",
-			flags,
-			0,
-			&tempBlob,
-			&error_blob);
-		if (FAILED(hr)) {
-			if (error_blob) {
-				OutputDebugStringA((char*)error_blob->GetBufferPointer());
-				error_blob->Release();
-			}
-			if (tempBlob) { tempBlob->Release(); }
-			return false;
-		}
-
-		vsBlob = tempBlob;
-
-		// COMPILE PIXEL SHADER
-		hr = D3DCompileFromFile(
-			L"shaders/shaders.hlsl",
-			nullptr,
-			D3D_COMPILE_STANDARD_FILE_INCLUDE,
-			"ps_main",
-			"ps_5_0",
-			flags,
-			0,
-			&tempBlob,
-			&error_blob);
-		if (FAILED(hr)) {
-			if (error_blob) {
-				OutputDebugStringA((char*)error_blob->GetBufferPointer());
-				error_blob->Release();
-			}
-			if (tempBlob) { tempBlob->Release(); }
-			return false;
-		}
-
-		psBlob = tempBlob;
-
-		hr = device->CreateVertexShader(
-			vsBlob->GetBufferPointer(),
-			vsBlob->GetBufferSize(),
-			NULL,
-			&vertexShader);
-		assert(SUCCEEDED(hr));
-
-		hr = device->CreatePixelShader(
-			psBlob->GetBufferPointer(),
-			psBlob->GetBufferSize(),
-			NULL,
-			&pixelShader);
-		assert(SUCCEEDED(hr));
-
-		return true;
-	}
-
 	ENGINE_API void ResizeWindow()
 	{
 		immediateContext->OMSetRenderTargets(0, 0, 0);
@@ -250,8 +173,8 @@ namespace engine
 		HRESULT res = swapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
 		assert(SUCCEEDED(res));
 
-		Texture2D* frameBuffer;
-		res = swapChain->GetBuffer(0, __uuidof(Texture2D), (void**)&frameBuffer);
+		ID3D11Texture2D* frameBuffer;
+		res = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&frameBuffer);
 		assert(SUCCEEDED(res));
 
 		res = device->CreateRenderTargetView(frameBuffer, NULL, &renderTarget);
@@ -347,7 +270,7 @@ namespace engine
 		ImGui::Render();
 		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
-		swapChain->Present(1, 0);
+		swapChain->Present(0, 0);
 
 		Mouse::Get().EndOfInputFrame();
 

@@ -108,7 +108,7 @@ inline bool engine::Shader::Load(const wchar_t* vsFile, const wchar_t* psFile, D
 
 void engine::Shader::Reload()
 {
-	errorBlob->Release();
+	if (errorBlob) errorBlob->Release();
 	vsBlob->Release();
 	psBlob->Release();
 	inputLayout->Release();

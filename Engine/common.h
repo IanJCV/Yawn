@@ -10,7 +10,6 @@
 #define Device ID3D11Device
 #define DeviceContext ID3D11DeviceContext
 #define SwapChain IDXGISwapChain
-#define Texture2D ID3D11Texture2D
 #define RenderTargetView ID3D11RenderTargetView
 #define DepthTargetView ID3D11DepthStencilView
 #define ShaderBlob ID3DBlob

@@ -16,9 +16,6 @@
 #define HID_USAGE_GENERIC_MOUSE        ((USHORT) 0x02)
 #endif
 
-#include <atlbase.h>
-#include <atlconv.h>
-
 #include <DirectXTK/Keyboard.h>
 #include <DirectXTK/Mouse.h>
 

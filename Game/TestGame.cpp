@@ -4,6 +4,8 @@
 engine::Model* car;
 engine::Model* playground;
 engine::Shader* shader;
+engine::Texture* gridTexture;
+engine::CubemapTexture* skyTexture;
 
 engine::Camera* camera;
 
@@ -49,8 +51,28 @@ GameLoad TestGame::LoadResources()
         assert(false);
     }
 
+    gridTexture = new engine::Texture("textures/grid.png");
+    if (!gridTexture->texture)
+    {
+        DebugOut(L"Couldn't load texture!\n");
+        assert(false);
+    }
+
+    car->texture = gridTexture;
+    playground->texture = gridTexture;
+    
     car->modelMatrix = car->modelMatrix * Matrix::CreateScale(0.2f);
     playground->modelMatrix = playground->modelMatrix * Matrix::CreateScale(0.2f);
+
+    /*skyTexture = new engine::CubemapTexture(std::vector<std::string>(
+        {
+            "textures/skyboxes/miramar_rt.tga",
+            "textures/skyboxes/miramar_lf.tga",
+            "textures/skyboxes/miramar_up.tga",
+            "textures/skyboxes/miramar_dn.tga",
+            "textures/skyboxes/miramar_ft.tga",
+            "textures/skyboxes/miramar_bk.tga",
+        }));*/
 
     randomSound = new engine::audio::SoundEvent("event:/e_click");
 
@@ -97,6 +119,8 @@ bool TestGame::Update(float dt)
 void TestGame::Render(engine::Renderer& rend, ImGuiContext* ctx, float dt)
 {
     ImGui::SetCurrentContext(ctx);
+    //rend.DrawSkybox(skyTexture);
+
     rend.SubmitForRendering(car);
     rend.SubmitForRendering(playground);
 
@@ -116,6 +140,11 @@ void TestGame::Render(engine::Renderer& rend, ImGuiContext* ctx, float dt)
         if (ImGui::Button("Reload shader"))
         {
             shader->Reload();
+        }
+
+        if (ImGui::Button("Reload skybox"))
+        {
+            rend.m_SkyboxShader->Reload();
         }
         ImGui::End();
     }

@@ -4,6 +4,7 @@
 #include "shader.h"
 #include "camera.h"
 #include "constant_buffer.h"
+#include "texture.h"
 
 namespace engine
 {
@@ -45,6 +46,8 @@ namespace engine
         Shader* shader;
 
         Matrix modelMatrix;
+
+        Texture* texture;
     };
 
 	class ENGINE_API Renderer
@@ -55,9 +58,11 @@ namespace engine
         void SetContext(DeviceContext** context);
         void SetCamera(Camera* camera);
         void PreUpdate();
+        void DrawSkybox(CubemapTexture* texture);
 		void SubmitForRendering(Model* model);
 
         Camera* camera;
+        Shader* m_SkyboxShader;
 	private:
         Renderer();
 
@@ -66,6 +71,8 @@ namespace engine
         struct MatrixBuffer
         {
             Matrix model;
+            Matrix view;
+            Matrix projection;
             Matrix mvp;
             Color color;
             Vector3 camera;
@@ -74,8 +81,10 @@ namespace engine
         };
 
         Matrix m_ViewProjection;
-
         ConstantBuffer m_MatrixBuffer;
+
+        Mesh* m_SkyboxMesh;
+        ID3D11InputLayout* m_SkyboxInputLayout;
 	};
 
     ENGINE_API engine::Model* LoadModel(const char* filename, engine::Shader* shader);

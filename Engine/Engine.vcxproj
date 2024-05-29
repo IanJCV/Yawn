@@ -188,15 +188,18 @@
     <ClInclude Include="scene.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="stbi_image.h" />
+    <ClInclude Include="texture.h" />
     <ClInclude Include="world.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\include\DirectXTK\CommonStates.cpp" />
+    <ClCompile Include="..\common\include\DirectXTK\DDSTextureLoader.cpp" />
     <ClCompile Include="..\common\include\DirectXTK\DirectXHelpers.cpp" />
     <ClCompile Include="..\common\include\DirectXTK\Keyboard.cpp" />
     <ClCompile Include="..\common\include\DirectXTK\Mouse.cpp" />
     <ClCompile Include="..\common\include\DirectXTK\SimpleMath.cpp" />
     <ClCompile Include="..\common\include\DirectXTK\VertexTypes.cpp" />
+    <ClCompile Include="..\common\include\DirectXTK\WICTextureLoader.cpp" />
     <ClCompile Include="..\common\include\imgui\imgui.cpp" />
     <ClCompile Include="..\common\include\imgui\imgui_demo.cpp" />
     <ClCompile Include="..\common\include\imgui\imgui_draw.cpp" />
@@ -224,6 +227,7 @@
     <ClCompile Include="stbi_image.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="texture.cpp" />
     <ClCompile Include="world.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -7,7 +7,6 @@ namespace engine
 {
 
 	// D3D Globals
-	extern ENGINE_API DeviceContext* immediateContext;
 	extern ENGINE_API DeviceContext* deferredContext;
 	extern ENGINE_API SwapChain* swapChain;
 	extern ENGINE_API RenderTargetView* renderTarget;
@@ -27,8 +26,6 @@ namespace engine
 
 	inline ENGINE_API bool g_DirectXInitialized;
 	ENGINE_API void DirectXSetup(HWND hwnd);
-
-	ENGINE_API bool ReloadShaders();
 
 	ENGINE_API void ResizeWindow();
 

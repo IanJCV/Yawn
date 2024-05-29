@@ -93,6 +93,9 @@
     <ClInclude Include="..\common\include\DirectXTK\Keyboard.h">
       <Filter>Header Files\DirectXTK</Filter>
     </ClInclude>
+    <ClInclude Include="texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -175,6 +178,15 @@
     </ClCompile>
     <ClCompile Include="globals.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\include\DirectXTK\WICTextureLoader.cpp">
+      <Filter>Header Files\DirectXTK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\include\DirectXTK\DDSTextureLoader.cpp">
+      <Filter>Header Files\DirectXTK</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
