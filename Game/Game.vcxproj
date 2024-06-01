@@ -131,8 +131,10 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;GAME_EXPORTS;GAME_DLLCOMPILE;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(SolutionDir)Engine;$(SolutionDir)common/include;</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -140,6 +142,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <AdditionalLibraryDirectories>$(SolutionDir)common/lib;$(OutDir);</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -162,6 +165,7 @@
     <ClCompile Include="..\common\include\DirectXTK\Keyboard.cpp" />
     <ClCompile Include="..\common\include\DirectXTK\Mouse.cpp" />
     <ClCompile Include="..\common\include\DirectXTK\SimpleMath.cpp" />
+    <ClCompile Include="..\common\include\imguizmo\ImGuizmo.cpp" />
     <ClCompile Include="..\common\include\imgui\imgui.cpp" />
     <ClCompile Include="..\common\include\imgui\imgui_demo.cpp" />
     <ClCompile Include="..\common\include\imgui\imgui_draw.cpp" />
@@ -171,7 +175,6 @@
     <ClCompile Include="..\common\include\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\common\include\imgui\imgui_widgets.cpp" />
     <ClCompile Include="debugscene.cpp" />
-    <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

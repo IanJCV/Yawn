@@ -33,12 +33,12 @@ void engine::Camera::Update(float dt, Vector3 movement, Vector2 rotation)
     Forward = m.Forward();
     Right = m.Right();
 
-    if (Pitch > d2r(88))
-        Pitch = d2r(88);
-    if (Pitch < -d2r(88))
-        Pitch = -d2r(88);
+    if (Pitch > d2r(89.0f))
+        Pitch = d2r(89.0f);
+    if (Pitch < -d2r(89.0f))
+        Pitch = -d2r(89.0f);
 
-    const float CAM_MOVE_AMOUNT = 2.f * dt;
+    const float CAM_MOVE_AMOUNT = 6.f * dt;
 	Position += (movement.z * Forward + movement.x * Right) * CAM_MOVE_AMOUNT;
 	Position += (Vector3::UnitY * movement.y) * CAM_MOVE_AMOUNT;
 

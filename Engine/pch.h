@@ -32,6 +32,11 @@
 #pragma comment( lib, "d3dcompiler.lib" )	// shader compiler
 #pragma comment( lib, "fmodstudio_vc.lib" ) // FMOD
 
+#if (_WIN32_WINNT >= 0x0A00 /*_WIN32_WINNT_WIN10*/)
+#pragma comment( lib, "runtimeobject.lib" ) // Windows Runtime Library
+#endif
+
+
 #if _DEBUG
 #pragma comment( lib, "assimp-d.lib" )
 #pragma comment( lib, "zlibstaticd.lib" )

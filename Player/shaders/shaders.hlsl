@@ -9,8 +9,9 @@ cbuffer constants : register(b0)
     float4x4 mvp;
     float4 col;
     float3 viewPos;
+    float3 viewDir;
 
-    float pad;
+    float2 pad;
 };
 
 struct vs_in
@@ -59,7 +60,6 @@ float4 ps_main(vs_out input) : SV_TARGET
     fresnel = pow(fresnel, 0.1);
     float4 tex = diffuse1.Sample(sampler_diffuse1, input.texcoord);
     float3 finalLight = light /* + (fresnel * float3(1.0, 0.0, 0.0))*/;
-    
     
     return float4(tex * finalLight, 1.0);
 }

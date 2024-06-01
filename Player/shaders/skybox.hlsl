@@ -1,4 +1,4 @@
-Texture2DArray cubeTexture : register(t0);
+TextureCube cubeTexture : register(t0);
 SamplerState sampler_cubeTexture : register(s0);
 
 cbuffer constants : register(b0)
@@ -9,34 +9,35 @@ cbuffer constants : register(b0)
     float4x4 mvp;
     float4 col;
     float3 viewPos;
+    float3 viewDir;
 
-    float pad;
+    float2 pad;
 };
 
 
 struct vs_in
 {
-    float3 positionOS : SV_Position;
+    float3 positionWS : SV_Position;
 };
 
 struct vs_out
 {
     float4 positionCS : SV_Position;
-    float3 texcoords : TEXCOORD0;
+    float3 texcoords : POSITION1;
 };
 
 vs_out vs_main(vs_in input)
 {
     vs_out output = (vs_out) 0;
   
-    output.positionCS = mul(mul(projection, view), float4(input.positionOS, 1.0)).xyww;
-    output.texcoords = input.positionOS;
+    output.positionCS = mul(mul(projection, view), float4(input.positionWS * 100000, 1.0)).xyww;
+    output.texcoords = input.positionWS;
     
     return output;
 }
 
 float4 ps_main(vs_out input) : SV_TARGET
-{   
-    float4 col = cubeTexture.Sample(sampler_cubeTexture, float3(input.texcoords.x, input.texcoords.y, -input.texcoords.z));
+{       
+    float4 col = cubeTexture.Sample(sampler_cubeTexture, input.texcoords);
     return col;
 }

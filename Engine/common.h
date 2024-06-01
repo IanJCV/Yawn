@@ -24,10 +24,20 @@
 
 #define _deg2rad(deg) (DEG2RAD * deg)
 
+extern ENGINE_API bool g_Vsync;
+
 ENGINE_API void DebugOut(const wchar_t* fmt, ...);
 
 ENGINE_API std::wstring get_utf16(const std::string& str);
 
-ENGINE_API constexpr float d2r(float deg);
+ENGINE_API constexpr float d2r(const float& deg);
+
+ENGINE_API constexpr DirectX::SimpleMath::Vector3 d2r(const DirectX::SimpleMath::Vector3& angles);
 
 ENGINE_API float deg2rad(float deg);
+
+ENGINE_API std::string str2lower(std::string s);
+
+ENGINE_API std::wstring widen(const std::string& str);
+
+ENGINE_API std::string narrow(const std::wstring& str);

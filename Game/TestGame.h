@@ -8,8 +8,13 @@ class GAME_API TestGame : public Game
 public:
 	// Inherited via Game
 	GameLoad LoadResources() override;
+
 	bool Update(float dt) override;
 	void Render(engine::Renderer& rend, ImGuiContext* ctx, float dt) override;
+	
+	void OnWindowFocused() override;
+	void OnWindowUnfocused() override;
+
 	void Shutdown() override;
 	TestGame();
 };

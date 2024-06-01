@@ -19,6 +19,12 @@
     <Filter Include="Header Files\DirectXTK">
       <UniqueIdentifier>{82268b16-a49c-4eb3-bcdb-caa641839521}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\DirectXTex">
+      <UniqueIdentifier>{c5ad00f5-3bb8-4227-9fcf-c6c5ff396845}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\imguizmo">
+      <UniqueIdentifier>{8244bf46-1774-48c3-8b77-053516e9b7b8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="engine.h">
@@ -94,6 +100,27 @@
       <Filter>Header Files\DirectXTK</Filter>
     </ClInclude>
     <ClInclude Include="texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\include\DirectXTex\DirectXTexP.h">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\include\DirectXTex\filters.h">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\include\DirectXTex\scoped.h">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\include\DirectXTex\DDS.h">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\include\DirectXTex\DirectXTex.h">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClInclude>
+    <ClInclude Include="model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="errorshader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -188,8 +215,79 @@
     <ClCompile Include="..\common\include\DirectXTK\DDSTextureLoader.cpp">
       <Filter>Header Files\DirectXTK</Filter>
     </ClCompile>
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexCompressGPU.cpp">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexConvert.cpp">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexD3D11.cpp">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexDDS.cpp">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexFlipRotate.cpp">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexHDR.cpp">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexImage.cpp">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexMipmaps.cpp">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexMisc.cpp">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexNormalMaps.cpp">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexPMAlpha.cpp">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexResize.cpp">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexTGA.cpp">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexUtil.cpp">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexWIC.cpp">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexCompress.cpp">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\include\DirectXTex\BC4BC5.cpp">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\include\DirectXTex\BC6HBC7.cpp">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\include\DirectXTex\BCDirectCompute.cpp">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\include\DirectXTex\BC.cpp">
+      <Filter>Header Files\DirectXTex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\include\imguizmo\ImGuizmo.cpp">
+      <Filter>Header Files\imguizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\common\lib\fmodstudio_vc.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\common\include\DirectXTex\DirectXTex.inl">
+      <Filter>Header Files\DirectXTex</Filter>
+    </None>
   </ItemGroup>
 </Project>

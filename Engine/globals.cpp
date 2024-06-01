@@ -7,4 +7,8 @@ namespace engine
 
 	ENGINE_API DeviceContext* immediateContext;
 	ENGINE_API Device* device;
+	ENGINE_API ID3D11SamplerState* defaultSamplerState;
+
+	ENGINE_API ID3D11RasterizerState* rasterizerState;
+	ENGINE_API ID3D11RasterizerState* wireframeState;
 }

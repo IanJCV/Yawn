@@ -108,5 +108,8 @@
     <Text Include="shaders\skybox.hlsl">
       <Filter>shaders</Filter>
     </Text>
+    <Text Include="shaders\errorshader.hlsl">
+      <Filter>shaders</Filter>
+    </Text>
   </ItemGroup>
 </Project>

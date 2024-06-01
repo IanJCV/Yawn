@@ -1,54 +1,207 @@
 #include "texture.h"
 #include <DirectXTK/WICTextureLoader.h>
+#include <DirectXTK/DDSTextureLoader.h>
+#include <DirectXTex/DirectXTex.h>
+
+#include <filesystem>
+
+ENGINE_API std::vector<engine::Texture*> engine::allTextures;
+
+namespace
+{
+	void LoadTexture(
+		Device* device, 
+		DeviceContext* ctx,
+		ID3D11Texture2D** texture, 
+		const char* filename, 
+		int& width, int& height, int& channels, 
+		D3D11_USAGE Usage = D3D11_USAGE_DEFAULT, 
+		UINT BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET, 
+		UINT CPUAccess = 0)
+	{
+		std::string ext = str2lower(std::filesystem::path(filename).extension().string());
+
+		DirectX::ScratchImage img;
+		DirectX::TexMetadata meta;
+		std::wstring f = widen(filename);
+		const wchar_t* file = f.c_str();
+
+		if (ext == ".dds")
+		{
+			DirectX::GetMetadataFromDDSFile(file, DirectX::DDS_FLAGS_ALLOW_LARGE_FILES, meta);
+			DirectX::LoadFromDDSFile(file, DirectX::DDS_FLAGS_ALLOW_LARGE_FILES, &meta, img);
+		}
+		else if (ext == ".tga")
+		{
+			DirectX::GetMetadataFromTGAFile(file, meta);
+			DirectX::LoadFromTGAFile(file, 
+				DirectX::TGA_FLAGS_ALLOW_ALL_ZERO_ALPHA | DirectX::TGA_FLAGS_FORCE_SRGB,
+				&meta,
+				img);
+		}
+		else
+		{
+			DirectX::GetMetadataFromWICFile(file, DirectX::WIC_FLAGS_FILTER_LINEAR, meta);
+			DirectX::LoadFromWICFile(file, DirectX::WIC_FLAGS_FILTER_LINEAR, &meta, img);
+		}
+
+		const DirectX::Image* image = img.GetImage(0, 0, 0);
+
+		HRESULT hres = DirectX::CreateTextureEx(device, image, 1, meta, Usage, BindFlags, CPUAccess, 0, DirectX::CREATETEX_DEFAULT, (ID3D11Resource**)texture);
+
+		if (FAILED(hres))
+		{
+			std::string s(filename);
+			DebugOut(L"Failed to load texture at path %s!\n", get_utf16(s));
+			assert(false);
+		}
+
+		// stbi implementation
+		// unsigned char* result;
+		// result = stbi_load(filename, &width, &height, &channels, 4);
+
+		//D3D11_TEXTURE2D_DESC desc;
+		//desc.Height = height;
+		//desc.Width = width;
+		//desc.MipLevels = 4;
+		//desc.ArraySize = 1;
+		//desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		//desc.SampleDesc.Count = 1;
+		//desc.SampleDesc.Quality = 0;
+		//desc.Usage = Usage;
+		//desc.BindFlags = BindFlags;
+		//desc.CPUAccessFlags = CPUAccess;
+		//desc.MiscFlags = BindFlags == 40U ? D3D11_RESOURCE_MISC_GENERATE_MIPS : 0;
+
+		//D3D11_SUBRESOURCE_DATA subresource;
+		//D3D11_SUBRESOURCE_DATA* d;
+		//UINT rowPitch = (width * 4) * sizeof(unsigned char);
+
+		//if (Usage == D3D11_USAGE_DEFAULT)
+		//{
+		//	d = NULL;
+		//}
+		//else
+		//{
+		//	d = &subresource;
+
+		//	subresource.pSysMem = (const void*)image->pixels;
+		//	subresource.SysMemPitch = image->rowPitch;
+		//	subresource.SysMemSlicePitch = 0;
+		//}
+
+		//if (Usage == D3D11_USAGE_DEFAULT)
+		//{
+		//	ctx->UpdateSubresource(*texture, 0, NULL, result, rowPitch, 0);
+		//}
+
+		//delete[] result;
+	}
+}
+
+namespace texture
+{
+
+	void Load(const char* filename, DirectX::ScratchImage& image, DirectX::TexMetadata& metadata)
+	{
+		std::string ext = str2lower(std::filesystem::path(filename).extension().string());
+
+		std::wstring f = widen(filename);
+		const wchar_t* file = f.c_str();
+
+		if (ext == ".dds")
+		{
+			DirectX::GetMetadataFromDDSFile(file, DirectX::DDS_FLAGS_ALLOW_LARGE_FILES, metadata);
+			DirectX::LoadFromDDSFile(file, DirectX::DDS_FLAGS_ALLOW_LARGE_FILES, &metadata, image);
+		}
+		else if (ext == ".tga")
+		{
+			DirectX::GetMetadataFromTGAFile(file, metadata);
+			DirectX::LoadFromTGAFile(file,
+				DirectX::TGA_FLAGS_ALLOW_ALL_ZERO_ALPHA | DirectX::TGA_FLAGS_FORCE_SRGB,
+				&metadata,
+				image);
+		}
+		else
+		{
+			DirectX::GetMetadataFromWICFile(file, DirectX::WIC_FLAGS_FILTER_LINEAR, metadata);
+			DirectX::LoadFromWICFile(file, DirectX::WIC_FLAGS_FILTER_LINEAR, &metadata, image);
+		}
+	}
+
+	void Load(const char* filename, Device* device, ID3D11Texture2D** tex, ID3D11ShaderResourceView** view, DirectX::TexMetadata& meta, 
+
+		D3D11_USAGE usage = D3D11_USAGE_DEFAULT, UINT BindFlags = D3D11_BIND_SHADER_RESOURCE, UINT CpuFlags = 0, UINT MiscFlags = 0)
+	{
+		std::string ext = str2lower(std::filesystem::path(filename).extension().string());
+
+		std::wstring f = widen(filename);
+		const wchar_t* file = f.c_str();
+
+		if (ext == ".dds")
+		{
+			DirectX::GetMetadataFromDDSFile(file, DirectX::DDS_FLAGS_ALLOW_LARGE_FILES, meta);
+			DirectX::CreateDDSTextureFromFileEx(device, file, 0Ui64, usage, BindFlags, CpuFlags, MiscFlags, DirectX::DDS_LOADER_DEFAULT, (ID3D11Resource**)tex, view);
+		}
+		else if (ext == ".tga")
+		{
+			DirectX::GetMetadataFromTGAFile(file, meta);
+			DirectX::ScratchImage img;
+			DirectX::LoadFromTGAFile(file, &meta, img);
+			if (view != NULL)
+			{
+				DirectX::CreateShaderResourceViewEx(device, img.GetImage(0, 0, 0), 1, meta, usage, BindFlags, CpuFlags, MiscFlags, DirectX::CREATETEX_DEFAULT, view);
+			}
+			if (tex != NULL)
+			{
+				DirectX::CreateTexture(device, img.GetImage(0, 0, 0), 1, meta, (ID3D11Resource**)tex);
+			}
+		}
+		else
+		{
+			DirectX::GetMetadataFromWICFile(file, DirectX::WIC_FLAGS_FILTER_LINEAR, meta);
+			DirectX::CreateWICTextureFromFile(device, file, (ID3D11Resource**)tex, view);
+		}
+	}
+
+	int GetPitch(const char* filename)
+	{
+		using namespace DirectX;
+		TexMetadata metadata;
+		ScratchImage image;
+
+		Load(filename, image, metadata);
+
+		int pitch = image.GetImage(0, 0, 0)->rowPitch;
+
+		image.Release();
+		return pitch;
+	}
+}
 
 inline engine::Texture::Texture(const char* filename)
+	:name(std::filesystem::path(filename).filename().string())
 {
-	int channels = 0;
-	unsigned char* result = stbi_load(filename, &width, &height, &channels, 4);
+	ID3D11Texture2D* texture;
+
+	std::wstring f = widen(filename);
+	HRESULT hr = DirectX::CreateWICTextureFromFile(device, f.c_str(), (ID3D11Resource**)&texture, &textureView);
 
 	D3D11_TEXTURE2D_DESC desc;
-	desc.Height = height;
-	desc.Width = width;
-	desc.MipLevels = 0;
-	desc.ArraySize = 1;
-	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	desc.SampleDesc.Count = 1;
-	desc.SampleDesc.Quality = 0;
-	desc.Usage = D3D11_USAGE_DEFAULT;
-	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
-	desc.CPUAccessFlags = 0;
-	desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
-	HRESULT hr = device->CreateTexture2D(&desc, NULL, &texture);
+	texture->GetDesc(&desc);
+
+	this->width = desc.Width;
+	this->height = desc.Height;
+
+	texture->Release();
+
 	if (FAILED(hr))
 	{
 		std::string s(filename);
 		DebugOut(L"Failed to load texture at path %s!\n", get_utf16(s));
 		assert(false);
 	}
-
-	unsigned int rowPitch = (width * 4) * sizeof(unsigned char);
-
-	immediateContext->UpdateSubresource(texture, 0, NULL, result, rowPitch, 0);
-
-	D3D11_SHADER_RESOURCE_VIEW_DESC rDesc;
-	rDesc.Format = desc.Format;
-	rDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	rDesc.Texture2D.MostDetailedMip = 0;
-	rDesc.Texture2D.MipLevels = -1;
-
-	hr = device->CreateShaderResourceView(texture, &rDesc, &textureView);
-	if (FAILED(hr))
-	{
-		std::string s(filename);
-		DebugOut(L"Failed to load texture at path %s!\n", get_utf16(s));
-		assert(false);
-	}
-
-	immediateContext->GenerateMips(textureView);
-
-	delete[] result;
-	result = 0;
 }
 
 engine::Texture::~Texture()
@@ -68,88 +221,54 @@ engine::Texture::~Texture()
 
 engine::CubemapTexture::CubemapTexture(std::vector<std::string> filenames)
 {
-    //Description of each face
-    D3D11_TEXTURE2D_DESC texDesc = {};
+	if (filenames.size() != 6)
+	{
+		DebugOut(L"Incorrect number of texture paths passed into cubemap loader! Passed in: %d, needs 6\n", filenames.size());
+		assert(false);
+	}
 
-    D3D11_TEXTURE2D_DESC texDesc1 = {};
-    //The Shader Resource view description
-    D3D11_SHADER_RESOURCE_VIEW_DESC SMViewDesc = {};
+	using namespace DirectX;
+	std::vector<TexMetadata> metas(6);
+	std::vector<ScratchImage> sImages(6);
 
-    ID3D11Texture2D* tex[6] = { nullptr, nullptr, nullptr,nullptr, nullptr, nullptr };
+	Image images[6];
 
-	int channels;
+	for (size_t i = 0; i < 6; i++)
+	{
+		texture::Load(filenames[i].c_str(), sImages[i], metas[i]);
 
-	texDesc1.MipLevels = 0;
-	texDesc1.ArraySize = 1;
-	texDesc1.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	texDesc1.SampleDesc.Count = 1;
-	texDesc1.SampleDesc.Quality = 0;
-	texDesc1.Usage = D3D11_USAGE_DEFAULT;
-	texDesc1.BindFlags = 0;
-	texDesc1.CPUAccessFlags = 0;
-	texDesc1.MiscFlags = 0;
+		images[i] = *sImages[i].GetImage(0, 0, 0);
+	}
 
-    for (int i = 0; i < 6; i++)
-    {
-		unsigned char* result = stbi_load(filenames[i].c_str(), &width, &height, &channels, 4);
-		texDesc1.Width = width;
-		texDesc1.Height = height;
+	ScratchImage im;
+	im.InitializeCubeFromImages(images, 6);
 
-		HRESULT hr = device->CreateTexture2D(&texDesc1, NULL, &tex[i]);
-		if (FAILED(hr))
+	TexMetadata cubeMetadata;
+	cubeMetadata.arraySize = 6;
+	cubeMetadata.depth = 1;
+	cubeMetadata.dimension = TEX_DIMENSION_TEXTURE2D;
+	cubeMetadata.width = metas[0].width;
+	cubeMetadata.height = metas[0].height;
+	cubeMetadata.format = metas[0].format;
+	cubeMetadata.mipLevels = metas[0].mipLevels;
+
+	CreateShaderResourceView(device, im.GetImages(), im.GetImageCount(), cubeMetadata, &shaderResourceView);
+}
+
+
+engine::Texture* engine::Texture::GetTexture(const char* path)
+{
+	engine::Texture* tex;
+	for (size_t i = 0; i < engine::allTextures.size(); i++)
+	{
+		if (engine::allTextures[i]->name == std::filesystem::path(path).filename().string())
 		{
-			std::string s(filenames[i]);
-			DebugOut(L"Failed to load texture at path '%s'!\n", get_utf16(s).c_str());
-			assert(false);
+			tex = engine::allTextures[i];
+			return tex;
 		}
-    }
+	}
 
-    tex[0]->GetDesc(&texDesc1);
-
-    texDesc.Width = texDesc1.Width;
-    texDesc.Height = texDesc1.Height;
-    texDesc.MipLevels = texDesc1.MipLevels;
-    texDesc.ArraySize = 6;
-    texDesc.Format = texDesc1.Format;
-    texDesc.CPUAccessFlags = 0;
-    texDesc.SampleDesc.Count = 1;
-    texDesc.SampleDesc.Quality = 0;
-    texDesc.Usage = D3D11_USAGE_DEFAULT;
-    texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-    texDesc.CPUAccessFlags = 0;
-    texDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
-
-    SMViewDesc.Format = texDesc.Format;
-    SMViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
-    SMViewDesc.TextureCube.MipLevels = texDesc.MipLevels;
-    SMViewDesc.TextureCube.MostDetailedMip = 0;
-
-    HRESULT hr = device->CreateTexture2D(&texDesc, NULL, &cubeTexture);
-
-	assert(SUCCEEDED(hr));
-
-	/*
-    for (int i = 0; i < 6; i++)
-    {
-
-        for (UINT mipLevel = 0; mipLevel < texDesc.MipLevels; ++mipLevel)
-        {
-            D3D11_MAPPED_SUBRESOURCE mappedTex2D;
-            HRESULT hr = (immediateContext->Map(tex[i], mipLevel, D3D11_MAP_READ, 0, &mappedTex2D));
-            assert(SUCCEEDED(hr));
-            immediateContext->UpdateSubresource(cubeTexture,
-                D3D11CalcSubresource(mipLevel, i, texDesc.MipLevels),
-                0, mappedTex2D.pData, mappedTex2D.RowPitch, mappedTex2D.DepthPitch);
-
-            immediateContext->Unmap(tex[i], mipLevel);
-        }
-    }
-	*/
-
-    for (int i = 0; i < 6; i++)
-    {
-        tex[i]->Release();
-    }
-
-    device->CreateShaderResourceView(cubeTexture, &SMViewDesc, &shaderResourceView);
+	tex = new engine::Texture(path);
+	engine::allTextures.push_back(tex);
+	return tex;
 }

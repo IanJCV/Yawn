@@ -13,8 +13,6 @@ namespace engine
 	extern ENGINE_API DepthTargetView* depthTarget;
 	extern ENGINE_API ID3D11DepthStencilState* depthState;
 
-	extern ENGINE_API ID3D11RasterizerState* rasterizerState;
-
 	extern ENGINE_API ShaderBlob* vsBlob;
 	extern ENGINE_API ShaderBlob* psBlob;
 	extern ENGINE_API ShaderBlob* error_blob;

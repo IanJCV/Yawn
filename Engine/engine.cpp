@@ -5,8 +5,10 @@
 #include <DirectXTK/CommonStates.h>
 #include <imgui/imgui_impl_dx11.h>
 #include <imgui/imgui_impl_win32.h>
+#include <imguizmo/ImGuizmo.h>
 
 #include "audio.h"
+#include <wrl.h>
 
 
 namespace engine
@@ -21,8 +23,6 @@ namespace engine
 
 	ENGINE_API ID3D11DepthStencilState* depthState;
 
-	ENGINE_API ID3D11RasterizerState* rasterizerState;
-
 	ENGINE_API ShaderBlob* vsBlob;
 	ENGINE_API ShaderBlob* psBlob;
 	ENGINE_API ShaderBlob* error_blob;
@@ -33,7 +33,14 @@ namespace engine
 	ENGINE_API DirectX::Keyboard keyboard;
 	ENGINE_API void DirectXSetup(HWND hwnd)
 	{
-		CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+
+#if (_WIN32_WINNT >= 0x0A00 /*_WIN32_WINNT_WIN10*/)
+		Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(RO_INIT_MULTITHREADED);
+		assert(SUCCEEDED(initialize));
+#else
+		HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+		assert(SUCCEEDED(hr));
+#endif
 
 		// Init DX11
 		DXGI_SWAP_CHAIN_DESC swap_chain_descr = { 0 };
@@ -43,6 +50,7 @@ namespace engine
 		swap_chain_descr.SampleDesc.Count = 1;
 		swap_chain_descr.SampleDesc.Quality = 0;
 		swap_chain_descr.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		swap_chain_descr.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 		swap_chain_descr.BufferCount = 1;
 		swap_chain_descr.OutputWindow = hwnd;
 		swap_chain_descr.Windowed = true;
@@ -54,6 +62,10 @@ namespace engine
 		};
 
 		UINT flags = D3D11_CREATE_DEVICE_SINGLETHREADED;
+
+#ifdef _DEBUG
+		flags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
 
 		IDXGIFactory1* factory;
 		CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**)(&factory));
@@ -120,10 +132,12 @@ namespace engine
 		immediateContext->OMSetDepthStencilState(states->DepthDefault(), 0);
 
 		rasterizerState = states->CullClockwise();
+		wireframeState = states->Wireframe();
 		immediateContext->RSSetState(rasterizerState);
 
-		auto samplerState = states->LinearWrap();
-		immediateContext->PSSetSamplers(0, 1, &samplerState);
+		defaultSamplerState = states->AnisotropicWrap();
+		//defaultSamplerState = states->PointWrap();
+		immediateContext->PSSetSamplers(0, 1, &defaultSamplerState);
 
 		D3D11_TEXTURE2D_DESC depthTextureDesc;
 		ZeroMemory(&depthTextureDesc, sizeof(depthTextureDesc));
@@ -260,7 +274,7 @@ namespace engine
 		immediateContext->OMSetRenderTargets(1, &renderTarget, depthTarget);
 		immediateContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		auto rend = engine::Renderer::Get();
+		auto& rend = engine::Renderer::Get();
 
 		rend.SetContext(&immediateContext);
 		rend.PreUpdate();
@@ -270,7 +284,7 @@ namespace engine
 		ImGui::Render();
 		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
-		swapChain->Present(0, 0);
+		swapChain->Present(g_Vsync, 0);
 
 		Mouse::Get().EndOfInputFrame();
 

@@ -25,5 +25,9 @@ public:
 
 	virtual void Render(engine::Renderer& rend, ImGuiContext* ctx, float dt) = 0;
 
+	virtual void OnWindowFocused() = 0;
+
+	virtual void OnWindowUnfocused() = 0;
+
 	virtual void Shutdown() = 0;
 };

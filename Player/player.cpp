@@ -32,6 +32,8 @@ using namespace SimpleMath;
 
 bool global_windowResize = false;
 
+TestGame game;
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
@@ -39,14 +41,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     WNDCLASS wc = { 0 };
     wc.lpfnWndProc = WndProc;
     //wc.style = CS_HREDRAW | CS_VREDRAW;
-    wc.hCursor = LoadCursor(NULL, IDC_ARROW);;
+    wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hInstance = hInstance;
     wc.hbrBackground = (HBRUSH)(COLOR_BACKGROUND);
     wc.lpszClassName = L"yawnengineapp";
     if (!RegisterClass(&wc))
         return 1;
 
-    HWND hwnd = CreateWindow(wc.lpszClassName, L"Player", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0, 0, 640, 480, 0, 0, hInstance, NULL);
+    HWND hwnd = CreateWindow(wc.lpszClassName, L"Player", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0, 0, 1280, 720, 0, 0, hInstance, NULL);
 
     RAWINPUTDEVICE Rid[1];
     Rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC;
@@ -75,8 +77,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     engine::DoGameSetup();
     ImGui::SetCurrentContext(engine::GetImGuiContext());
-
-    TestGame game;
 
     GameLoad gl = game.LoadResources();
     Keyboard* keyboard = gl.keyboard;
@@ -226,6 +226,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
     case WM_ACTIVATE:
+        if (wParam == WA_ACTIVE || wParam == WA_CLICKACTIVE)
+        {
+            game.OnWindowFocused();
+        }
+        else if (wParam == WA_INACTIVE)
+        {
+            game.OnWindowUnfocused();
+        }
     case WM_ACTIVATEAPP:
     case WM_INPUT:
     case WM_MOUSEMOVE:

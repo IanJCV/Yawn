@@ -45,19 +45,21 @@ namespace engine
 
         MatrixBuffer* buf = (MatrixBuffer*)c;
 
-
         Matrix proj;
         Matrix v;
+        Matrix m;
         camera->Projection.Transpose(proj);
         camera->View.Transpose(v);
+        Matrix::Identity.Transpose(m);
 
-        buf->model = Matrix::Identity;
-        buf->view = v;
-        buf->projection = proj;
-        buf->mvp = Matrix::Identity * camera->View * camera->Projection;
+        buf->model = m;
+        buf->view = camera->View;
+        buf->projection = camera->Projection;
+        buf->mvp = m * camera->View * camera->Projection;
         buf->color = Color(1.f, 1.f, 1.f, 1.f);
         buf->camera = camera->Position;
-        buf->pad = 1.f;
+        buf->cameraView = camera->Forward;
+        buf->pad = Vector2();
 
         m_MatrixBuffer.EndUpdate(ctx);
 
@@ -70,17 +72,19 @@ namespace engine
         ctx->DrawIndexed(m_SkyboxMesh->index_count, 0, 0);
     }
 
-	ENGINE_API void Renderer::SubmitForRendering(Model* model)
+	ENGINE_API void Renderer::SubmitForRendering(Model* model, bool wireframe)
 	{
 		auto ctx = (*context);
+
+        //if (wireframe)
+        //{
+        //    ctx->RSSetState(wireframe ? wireframeState : rasterizerState);
+        //}
 		
 		ctx->VSSetShader(model->shader->vertexShader, NULL, 0);
 		ctx->PSSetShader(model->shader->pixelShader, NULL, 0);
 
-        if (model->texture)
-        {
-            ctx->PSSetShaderResources(0, 1, &model->texture->textureView);
-        }
+        ctx->PSSetSamplers(0, 1, &defaultSamplerState);
 
         void* c = nullptr;
         m_MatrixBuffer.BeginUpdate(ctx, &c);
@@ -98,7 +102,8 @@ namespace engine
         buf->mvp = model->modelMatrix * camera->View * camera->Projection;
         buf->color = Color(1.f, 1.f, 1.f, 1.f);
         buf->camera = camera->Position;
-        buf->pad = 1.f;
+        buf->cameraView = camera->Forward;
+        buf->pad = Vector2();
 
         m_MatrixBuffer.EndUpdate(ctx);
 
@@ -110,12 +115,22 @@ namespace engine
 		{
             Mesh* mesh = model->meshes[i];
 
+            if (mesh->texture)
+            {
+                ctx->PSSetShaderResources(0, 1, &mesh->texture->textureView);
+            }
+
 			ctx->IASetVertexBuffers(0, 1, &mesh->vBuffer, &mesh->vertex_stride, &mesh->vertex_offset);
 
 			ctx->IASetIndexBuffer(mesh->iBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 			ctx->DrawIndexed(mesh->index_count, 0, 0);
         }
+
+        //if (wireframe)
+        //{
+        //    immediateContext->RSSetState(rasterizerState);
+        //}
 	}
 
     void ComputeBox(std::vector<DirectX::VertexPosition>& vertices, std::vector<uint32_t>& indices)
@@ -125,65 +140,27 @@ namespace engine
 
         using namespace DirectX;
 
-        DirectX::XMVECTORF32 g_XMIdentityR1 = { { { 0.0f, 1.0f, 0.0f, 0.0f } } };
-        DirectX::XMVECTORF32 g_XMIdentityR2 = { { { 0.0f, 0.0f, 1.0f, 0.0f } } };
-
-
-        // A box has six faces, each one pointing in a different direction.
-        constexpr int FaceCount = 6;
-
-        static const DirectX::XMVECTORF32 faceNormals[FaceCount] =
+        indices =
         {
-            { { {  0,  0,  1, 0 } } },
-            { { {  0,  0, -1, 0 } } },
-            { { {  1,  0,  0, 0 } } },
-            { { { -1,  0,  0, 0 } } },
-            { { {  0,  1,  0, 0 } } },
-            { { {  0, -1,  0, 0 } } },
+            0, 1, 3, 3, 1, 2,
+            1, 5, 2, 2, 5, 6,
+            5, 4, 6, 6, 4, 7,
+            4, 0, 7, 7, 0, 3,
+            3, 2, 7, 7, 2, 6,
+            4, 5, 0, 0, 5, 1
         };
 
-        static const DirectX::XMVECTORF32 textureCoordinates[4] =
+        vertices =
         {
-            { { { 1, 0, 0, 0 } } },
-            { { { 1, 1, 0, 0 } } },
-            { { { 0, 1, 0, 0 } } },
-            { { { 0, 0, 0, 0 } } },
+            VertexPosition(Vector3(-1, -1, -1)),
+            VertexPosition(Vector3(1, -1, -1)),
+            VertexPosition(Vector3(1, 1, -1)),
+            VertexPosition(Vector3(-1, 1, -1)),
+            VertexPosition(Vector3(-1, -1, 1)),
+            VertexPosition(Vector3(1, -1, 1)),
+            VertexPosition(Vector3(1, 1, 1)),
+            VertexPosition(Vector3(-1, 1, 1))
         };
-
-        // Create each face in turn.
-        for (int i = 0; i < FaceCount; i++)
-        {
-            const DirectX::XMVECTOR normal = faceNormals[i];
-
-            // Get two vectors perpendicular both to the face normal and to each other.
-            const DirectX::XMVECTOR basis = (i >= 4) ? g_XMIdentityR2 : g_XMIdentityR1;
-
-            const DirectX::XMVECTOR side1 = DirectX::XMVector3Cross(normal, basis);
-            const DirectX::XMVECTOR side2 = DirectX::XMVector3Cross(normal, side1);
-
-            // Six indices (two triangles) per face.
-            const size_t vbase = vertices.size();
-            indices.push_back(vbase + 0);
-            indices.push_back(vbase + 1);
-            indices.push_back(vbase + 2);
-
-            indices.push_back(vbase + 0);
-            indices.push_back(vbase + 2);
-            indices.push_back(vbase + 3);
-
-            // Four vertices per face.
-            // (normal - side1 - side2) * tsize // normal // t0
-            vertices.push_back(DirectX::VertexPosition(XMVectorSubtract(XMVectorSubtract(normal, side1), side2)));
-
-            // (normal - side1 + side2) * tsize // normal // t1
-            vertices.push_back(DirectX::VertexPosition(XMVectorAdd(XMVectorSubtract(normal, side1), side2)));
-
-            // (normal + side1 + side2) * tsize // normal // t2
-            vertices.push_back(DirectX::VertexPosition(XMVectorAdd(normal, XMVectorAdd(side1, side2))));
-
-            // (normal + side1 - side2) * tsize // normal // t3
-            vertices.push_back(DirectX::VertexPosition(XMVectorSubtract(XMVectorAdd(normal, side1), side2)));
-        }
     }
 
     void GenerateSkyboxMesh(Mesh* mesh)
@@ -237,128 +214,4 @@ namespace engine
             m_SkyboxShader->vsBlob->GetBufferSize(), 
             &m_SkyboxInputLayout);
 	}
-
-    engine::Model* LoadModel(const char* filename, engine::Shader* shader)
-    {
-        if (!std::filesystem::exists(filename))
-        {
-            return nullptr;
-        }
-
-        engine::Model* out;
-
-        Assimp::Importer importer;
-        const aiScene* scene = importer.ReadFile(filename,
-            aiProcess_Triangulate |
-            aiProcess_GenBoundingBoxes);
-
-        if (scene == nullptr)
-        {
-            return nullptr;
-        }
-
-        out = new engine::Model();
-
-        aiMesh* rMesh = nullptr;
-        engine::Mesh* tMesh = nullptr;
-
-        for (size_t i = 0; i < scene->mNumMeshes; i++)
-        {
-            rMesh = scene->mMeshes[i];
-            tMesh = new engine::Mesh();
-
-            tMesh->index_count = rMesh->mNumFaces * 3;
-
-            tMesh->vertex_count = rMesh->mNumVertices;
-            tMesh->vertex_stride = sizeof(Vertex);
-            tMesh->vertex_offset = 0;
-
-            std::vector<Vertex> verts;
-
-            for (size_t v = 0; v < rMesh->mNumVertices; v++)
-            {
-                aiVector3D pos = rMesh->mVertices[v];
-                aiVector3D norm = rMesh->mNormals[v];
-
-                aiColor4D color = aiColor4D(0.f, 0.f, 0.f, 0.f);
-                if (rMesh->HasVertexColors(0))
-                {
-                    color = rMesh->mColors[0][v];
-                }
-
-                aiVector3D texcoord = rMesh->mTextureCoords[0][v];
-
-                verts.push_back(Vertex(Vector3(pos.x, pos.y, pos.z), Vector3(norm.x, norm.y, norm.z), Color(color.r, color.g, color.b, color.a), Vector2(texcoord.x, texcoord.y)));
-            }
-
-            uint32_t* indices = new uint32_t[rMesh->mNumFaces * 3];
-
-            engine::AABB aabb;
-            auto min = rMesh->mAABB.mMin;
-            aabb.min = Vector3(min.x, min.y, min.z);
-
-            auto max = rMesh->mAABB.mMax;
-            aabb.max = Vector3(max.x, max.y, max.z);
-
-            tMesh->boundingBox = aabb;
-
-            for (size_t f = 0; f < rMesh->mNumFaces; f++)
-            {
-                aiFace face = rMesh->mFaces[f];
-                for (size_t fi = 0; fi < face.mNumIndices; fi++)
-                {
-                    indices[(f * 3) + fi] = face.mIndices[fi];
-                }
-            }
-
-            D3D11_BUFFER_DESC vertexBufferDesc = {};
-            vertexBufferDesc.ByteWidth = verts.size() * sizeof(Vertex);
-            vertexBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
-            vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-
-            D3D11_SUBRESOURCE_DATA subresourceData = { verts.data() };
-
-            HRESULT hResult = engine::device->CreateBuffer(&vertexBufferDesc, &subresourceData, &tMesh->vBuffer);
-            assert(SUCCEEDED(hResult));
-
-            D3D11_BUFFER_DESC indexBufferDesc = {};
-            indexBufferDesc.ByteWidth = tMesh->index_count * sizeof(uint32_t);
-            indexBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
-            indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-
-            D3D11_SUBRESOURCE_DATA indexSubresourceData = { indices };
-
-            hResult = engine::device->CreateBuffer(&indexBufferDesc, &indexSubresourceData, &tMesh->iBuffer);
-            assert(SUCCEEDED(hResult));
-
-            out->meshes.push_back(tMesh);
-            out->meshCount++;
-            out->indexCount += tMesh->index_count;
-
-            out->vBuffers.push_back(tMesh->vBuffer);
-            out->iBuffers.push_back(tMesh->iBuffer);
-            out->strides.push_back(tMesh->vertex_stride);
-            out->offsets.push_back(tMesh->vertex_offset);
-        }
-
-        out->modelMatrix = Matrix::Identity;
-        out->shader = shader;
-        HRESULT res = device->CreateInputLayout(
-            Vertex::InputElements, 
-            Vertex::InputElementCount, 
-            shader->vsBlob->GetBufferPointer(), 
-            shader->vsBlob->GetBufferSize(), 
-            &out->layout);
-
-        assert(SUCCEEDED(res));
-
-        if (FAILED(res))
-        {
-            delete out;
-            delete scene;
-            return nullptr;
-        }
-
-        return out;
-    }
 }

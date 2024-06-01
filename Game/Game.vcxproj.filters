@@ -22,6 +22,9 @@
     <Filter Include="Header Files\imgui">
       <UniqueIdentifier>{1c0ccb02-6965-4778-9fc8-af9f6e23eb10}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\imguizmo">
+      <UniqueIdentifier>{cf5280a8-d187-4dd8-b531-cf6a01508ef4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -65,9 +68,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dllmain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -112,6 +112,9 @@
     </ClCompile>
     <ClCompile Include="..\common\include\imgui\imgui_impl_win32.cpp">
       <Filter>Header Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\include\imguizmo\ImGuizmo.cpp">
+      <Filter>Header Files\imguizmo</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

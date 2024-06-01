@@ -165,6 +165,11 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\common\include\DirectXTex\DDS.h" />
+    <ClInclude Include="..\common\include\DirectXTex\DirectXTex.h" />
+    <ClInclude Include="..\common\include\DirectXTex\DirectXTexP.h" />
+    <ClInclude Include="..\common\include\DirectXTex\filters.h" />
+    <ClInclude Include="..\common\include\DirectXTex\scoped.h" />
     <ClInclude Include="..\common\include\DirectXTK\Keyboard.h" />
     <ClInclude Include="..\common\include\DirectXTK\Mouse.h" />
     <ClInclude Include="..\common\include\imgui\imconfig.h" />
@@ -181,8 +186,10 @@
     <ClInclude Include="common.h" />
     <ClInclude Include="constant_buffer.h" />
     <ClInclude Include="engine.h" />
+    <ClInclude Include="errorshader.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="globals.h" />
+    <ClInclude Include="model.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="rendering.h" />
     <ClInclude Include="scene.h" />
@@ -192,6 +199,26 @@
     <ClInclude Include="world.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\common\include\DirectXTex\BC.cpp" />
+    <ClCompile Include="..\common\include\DirectXTex\BC4BC5.cpp" />
+    <ClCompile Include="..\common\include\DirectXTex\BC6HBC7.cpp" />
+    <ClCompile Include="..\common\include\DirectXTex\BCDirectCompute.cpp" />
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexCompress.cpp" />
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexCompressGPU.cpp" />
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexConvert.cpp" />
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexD3D11.cpp" />
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexDDS.cpp" />
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexFlipRotate.cpp" />
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexHDR.cpp" />
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexImage.cpp" />
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexMipmaps.cpp" />
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexMisc.cpp" />
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexNormalMaps.cpp" />
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexPMAlpha.cpp" />
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexResize.cpp" />
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexTGA.cpp" />
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexUtil.cpp" />
+    <ClCompile Include="..\common\include\DirectXTex\DirectXTexWIC.cpp" />
     <ClCompile Include="..\common\include\DirectXTK\CommonStates.cpp" />
     <ClCompile Include="..\common\include\DirectXTK\DDSTextureLoader.cpp" />
     <ClCompile Include="..\common\include\DirectXTK\DirectXHelpers.cpp" />
@@ -200,6 +227,7 @@
     <ClCompile Include="..\common\include\DirectXTK\SimpleMath.cpp" />
     <ClCompile Include="..\common\include\DirectXTK\VertexTypes.cpp" />
     <ClCompile Include="..\common\include\DirectXTK\WICTextureLoader.cpp" />
+    <ClCompile Include="..\common\include\imguizmo\ImGuizmo.cpp" />
     <ClCompile Include="..\common\include\imgui\imgui.cpp" />
     <ClCompile Include="..\common\include\imgui\imgui_demo.cpp" />
     <ClCompile Include="..\common\include\imgui\imgui_draw.cpp" />
@@ -215,6 +243,7 @@
     <ClCompile Include="engine.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="globals.cpp" />
+    <ClCompile Include="model.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -246,6 +275,9 @@
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\common\lib\fmodstudio_vc.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\common\include\DirectXTex\DirectXTex.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

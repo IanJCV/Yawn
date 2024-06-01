@@ -13,8 +13,11 @@ namespace engine
 		~Texture();
 
 		int width, height;
+		std::string name;
 		ID3D11Texture2D* texture;
 		ID3D11ShaderResourceView* textureView;
+
+		static engine::Texture* GetTexture(const char* name);
 	private:
 
 	};
@@ -27,7 +30,9 @@ namespace engine
 		ID3D11Texture2D* cubeTexture = NULL;
 		ID3D11ShaderResourceView* shaderResourceView = NULL;
 
+		std::string name;
 		int width, height;
 	};
 
+	extern ENGINE_API std::vector<Texture*> allTextures;
 }
