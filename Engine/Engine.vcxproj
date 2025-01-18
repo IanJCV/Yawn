@@ -187,9 +187,11 @@
     <ClInclude Include="..\common\include\imgui\imstb_rectpack.h" />
     <ClInclude Include="..\common\include\imgui\imstb_textedit.h" />
     <ClInclude Include="..\common\include\imgui\imstb_truetype.h" />
+    <ClInclude Include="..\common\include\ini\ini.h" />
     <ClInclude Include="audio.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="common.h" />
+    <ClInclude Include="config.h" />
     <ClInclude Include="constant_buffer.h" />
     <ClInclude Include="engine.h" />
     <ClInclude Include="errormodel.h" />
@@ -243,9 +245,11 @@
     <ClCompile Include="..\common\include\imgui\imgui_stdlib.cpp" />
     <ClCompile Include="..\common\include\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\common\include\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="..\common\include\ini\ini.c" />
     <ClCompile Include="audio.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="common.cpp" />
+    <ClCompile Include="config.cpp" />
     <ClCompile Include="constant_buffer.cpp" />
     <ClCompile Include="engine.cpp" />
     <ClCompile Include="game.cpp" />

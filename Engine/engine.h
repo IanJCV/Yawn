@@ -12,6 +12,7 @@ namespace engine
 	extern ENGINE_API RenderTargetView* renderTarget;
 	extern ENGINE_API DepthTargetView* depthTarget;
 	extern ENGINE_API ID3D11DepthStencilState* depthState;
+	extern ENGINE_API HWND window;
 
 	extern ENGINE_API ShaderBlob* vsBlob;
 	extern ENGINE_API ShaderBlob* psBlob;
@@ -25,6 +26,7 @@ namespace engine
 	inline ENGINE_API bool g_DirectXInitialized;
 	ENGINE_API void DirectXSetup(HWND hwnd);
 
+	ENGINE_API void SetWindowSize(int w, int h);
 	ENGINE_API void ResizeWindow();
 
 	ENGINE_API void ClearBackground(DirectX::SimpleMath::Color color);

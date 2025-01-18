@@ -50,12 +50,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     HWND hwnd = CreateWindow(wc.lpszClassName, L"Player", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0, 0, 1280, 720, 0, 0, hInstance, NULL);
 
-    RAWINPUTDEVICE Rid[1];
-    Rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC;
-    Rid[0].usUsage = HID_USAGE_GENERIC_MOUSE;
-    Rid[0].dwFlags = RIDEV_INPUTSINK;
-    Rid[0].hwndTarget = hwnd;
-    RegisterRawInputDevices(Rid, 1, sizeof(Rid[0]));
+    RAWINPUTDEVICE Rid{};
+    Rid.usUsagePage = HID_USAGE_PAGE_GENERIC;
+    Rid.usUsage = HID_USAGE_GENERIC_MOUSE;
+    Rid.dwFlags = RIDEV_INPUTSINK;
+    Rid.hwndTarget = hwnd;
+    RegisterRawInputDevices(&Rid, 1, sizeof(Rid));
     
     assert(hwnd != NULL);
 

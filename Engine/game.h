@@ -7,11 +7,13 @@
 
 #include "scene.h"
 #include "rendering.h"
+#include "config.h"
 
 struct ENGINE_API GameLoad
 {
 	DirectX::Keyboard* keyboard;
 	DirectX::Mouse* mouse;
+	engine::Config* config;
 };
 
 class ENGINE_API Game

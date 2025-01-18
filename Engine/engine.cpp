@@ -20,6 +20,7 @@ namespace engine
 	ENGINE_API SwapChain* swapChain;
 	ENGINE_API RenderTargetView* renderTarget;
 	ENGINE_API DepthTargetView* depthTarget;
+	ENGINE_API HWND window;
 
 	ENGINE_API ID3D11DepthStencilState* depthState;
 
@@ -33,6 +34,7 @@ namespace engine
 	ENGINE_API DirectX::Keyboard keyboard;
 	ENGINE_API void DirectXSetup(HWND hwnd)
 	{
+		window = hwnd;
 
 #if (_WIN32_WINNT >= 0x0A00 /*_WIN32_WINNT_WIN10*/)
 		Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(RO_INIT_MULTITHREADED);
@@ -175,6 +177,12 @@ namespace engine
 
 		ImGui_ImplWin32_Init(hwnd);
 		ImGui_ImplDX11_Init(device, immediateContext);
+	}
+
+	ENGINE_API void SetWindowSize(int w, int h)
+	{
+		SetWindowPos(window, 0, 0, 0, w, h, SWP_NOMOVE | SWP_NOZORDER);
+		ResizeWindow();
 	}
 
 	ENGINE_API void ResizeWindow()

@@ -1,4 +1,5 @@
 #include "TestGame.h"
+#include "engine.h"
 #include "audio.h"
 #include <filesystem>
 #include <imguizmo/ImGuizmo.h>
@@ -18,6 +19,21 @@ DirectX::Keyboard keyboard;
 DirectX::Mouse mouse;
 
 engine::audio::SoundEvent* randomSound;
+
+engine::ConfigEntry cfg_MouseSens{ .category = "General", .name = "f_MouseSensitivity", .type = engine::EntryType::CENTRY_TYPE_FLOAT };
+engine::ConfigEntry cfg_WindowWidth{ .category = "Graphics", .name = "i_WindowWidth", .type = engine::EntryType::CENTRY_TYPE_INT };
+engine::ConfigEntry cfg_WindowHeight{ .category = "Graphics", .name = "i_WindowHeight", .type = engine::EntryType::CENTRY_TYPE_INT };
+
+engine::Config cfg =
+{
+    .entryCount = 3,
+    .entries =
+    {
+        &cfg_MouseSens,
+        &cfg_WindowWidth,
+        &cfg_WindowHeight
+    }
+};
 
 bool initialized= false;
 
@@ -55,6 +71,13 @@ void TestGame::OnWindowUnfocused()
 GameLoad TestGame::LoadResources()
 {
     initialized = true;
+
+    engine::ini_open("config.ini", &cfg);
+
+    if (cfg_WindowWidth.iValue != 0 && cfg_WindowHeight.iValue != 0)
+    {
+        engine::SetWindowSize(cfg_WindowWidth.iValue, cfg_WindowHeight.iValue);
+    }
 
     shader = new engine::Shader();
     const wchar_t* file = L"shaders/shaders.hlsl";
@@ -98,6 +121,7 @@ GameLoad TestGame::LoadResources()
     GameLoad gl;
     gl.keyboard = &keyboard;
     gl.mouse = &mouse;
+    gl.config = &cfg;
 
     auto thing = engine::Shader::Find("shaders");
 
@@ -141,20 +165,60 @@ bool TestGame::Update(float dt)
     return false;
 }
 
-static std::vector<float> MatrixToFloatArr(Matrix m, float** r)
+static float* MatrixToFloatArr(Matrix m, float** r)
 {
     DirectX::XMFLOAT4X4 temp;
     DirectX::XMStoreFloat4x4(&temp, m);
 
-    std::vector<float> result =
+    float result[] =
     {
         temp._11, temp._21, temp._31, temp._41,
         temp._12, temp._22, temp._32, temp._42,
         temp._13, temp._23, temp._33, temp._43,
         temp._14, temp._24, temp._34, temp._44
     };
-    *r = result.data();
+    *r = result;
     return result;
+}
+
+void EditTransform(const engine::Camera& camera, Matrix* matrix)
+{
+    static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::ROTATE);
+    static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
+    if (ImGui::IsKeyPressed(ImGuiKey_1))
+        mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+    if (ImGui::IsKeyPressed(ImGuiKey_2))
+        mCurrentGizmoOperation = ImGuizmo::ROTATE;
+    if (ImGui::IsKeyPressed(ImGuiKey_3))
+        mCurrentGizmoOperation = ImGuizmo::SCALE;
+    if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
+        mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+    ImGui::SameLine();
+    if (ImGui::RadioButton("Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE))
+        mCurrentGizmoOperation = ImGuizmo::ROTATE;
+    ImGui::SameLine();
+    if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE))
+        mCurrentGizmoOperation = ImGuizmo::SCALE;
+    Quaternion rotation;
+    Vector3 translation, scale;
+    matrix->Decompose(scale, rotation, translation);
+    ImGuizmo::DecomposeMatrixToComponents((float*)matrix, &translation.x, &rotation.x, &scale.x);
+    ImGui::InputFloat3("Tr", &translation.x);
+    ImGui::InputFloat3("Rt", &rotation.x);
+    ImGui::InputFloat3("Sc", &scale.x);
+    ImGuizmo::RecomposeMatrixFromComponents(&translation.x, &rotation.x, &scale.x, (float*)matrix);
+
+    if (mCurrentGizmoOperation != ImGuizmo::SCALE)
+    {
+        if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
+            mCurrentGizmoMode = ImGuizmo::LOCAL;
+        ImGui::SameLine();
+        if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
+            mCurrentGizmoMode = ImGuizmo::WORLD;
+    }
+    ImGuiIO& io = ImGui::GetIO();
+    ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+    ImGuizmo::Manipulate((float*)&camera.View, (float*)&camera.Projection, mCurrentGizmoOperation, mCurrentGizmoMode, (float*)matrix, NULL, NULL);
 }
 
 void TestGame::Render(engine::Renderer& rend, ImGuiContext* ctx, float dt)
@@ -163,6 +227,7 @@ void TestGame::Render(engine::Renderer& rend, ImGuiContext* ctx, float dt)
 
     ImGui::SetCurrentContext(ctx);
     ImGuizmo::BeginFrame();
+    ImGuizmo::Enable(true);
     rend.DrawSkybox();
 
     if (drawCar)
@@ -208,18 +273,7 @@ void TestGame::Render(engine::Renderer& rend, ImGuiContext* ctx, float dt)
     ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
     ImGuizmo::SetOrthographic(false);
 
-    float* view;
-    std::vector<float> t = MatrixToFloatArr(camera->View, &view);
-
-    float* projection;
-    MatrixToFloatArr(camera->Projection, &projection);
-
-    float* model;
-    MatrixToFloatArr(car->modelMatrix, &model);
-
-    ImGuizmo::Manipulate(view, projection, ImGuizmo::TRANSLATE, ImGuizmo::WORLD, model);
-
-    ImGuizmo::DrawCubes(view, projection, model, 1);
+    EditTransform(*camera, &car->modelMatrix);
 }
 
 void TestGame::Shutdown()
