@@ -1,4 +1,5 @@
 #include "rendering.h"
+#include "errormodel.h"
 #include <filesystem>
 #include <DirectXTK/CommonStates.h>
 
@@ -25,20 +26,19 @@ namespace engine
         m_ViewProjection = camera->View * camera->Projection;
     }
 
-    ENGINE_API void Renderer::DrawSkybox(CubemapTexture* texture)
+    ENGINE_API void Renderer::SetSkyTexture(CubemapTexture* texture)
     {
-        if (!texture)
-        {
-            DebugOut(L"Invalid skybox texture passed in!\n");
-            return;
-        }
+        sky = texture;
+    }
 
+    ENGINE_API void Renderer::DrawSkybox()
+    {
         auto ctx = (*context);
 
         ctx->VSSetShader(m_SkyboxShader->vertexShader, NULL, 0);
         ctx->PSSetShader(m_SkyboxShader->pixelShader, NULL, 0);
 
-        ctx->PSSetShaderResources(0, 1, &texture->shaderResourceView);
+        ctx->PSSetShaderResources(0, 1, &sky->shaderResourceView);
 
         void* c = nullptr;
         m_MatrixBuffer.BeginUpdate(ctx, &c);
@@ -85,6 +85,8 @@ namespace engine
 		ctx->PSSetShader(model->shader->pixelShader, NULL, 0);
 
         ctx->PSSetSamplers(0, 1, &defaultSamplerState);
+
+        ctx->PSSetShaderResources(1, 1, &sky->shaderResourceView);
 
         void* c = nullptr;
         m_MatrixBuffer.BeginUpdate(ctx, &c);
@@ -213,5 +215,11 @@ namespace engine
             m_SkyboxShader->vsBlob->GetBufferPointer(), 
             m_SkyboxShader->vsBlob->GetBufferSize(), 
             &m_SkyboxInputLayout);
+
+        Shader* vertexColorShader = new Shader();
+        const wchar_t* vfile = L"shaders/vertexcolors.hlsl";
+        vertexColorShader->Load(vfile, vfile, engine::device);
+
+        Model::errorModel = LoadModelFromMemory(errorModelText, errorModelTextCount, vertexColorShader);
 	}
 }

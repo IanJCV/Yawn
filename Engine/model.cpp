@@ -1,30 +1,14 @@
 #include "model.h"
+#include "errormodel.h"
 #include <filesystem>
 
 namespace engine
 {
     using namespace DirectX::SimpleMath;
 
-    engine::Model* LoadModel(const char* filename, engine::Shader* shader)
+    Model* Load(const aiScene* scene, const char* filename, Shader* shader)
     {
-        if (!std::filesystem::exists(filename))
-        {
-            return nullptr;
-        }
-
-        engine::Model* out;
-
-        Assimp::Importer importer;
-        const aiScene* scene = importer.ReadFile(filename,
-            aiProcess_Triangulate |
-            aiProcess_GenBoundingBoxes);
-
-        if (scene == nullptr)
-        {
-            return nullptr;
-        }
-
-        out = new engine::Model();
+        Model* out = new engine::Model();
 
         aiMesh* rMesh = nullptr;
         engine::Mesh* tMesh = nullptr;
@@ -45,7 +29,12 @@ namespace engine
             for (size_t v = 0; v < rMesh->mNumVertices; v++)
             {
                 aiVector3D pos = rMesh->mVertices[v];
-                aiVector3D norm = rMesh->mNormals[v];
+                aiVector3D norm = aiVector3D(0.f, 0.f, 0.f);
+                if (rMesh->HasNormals())
+                {
+                    norm = rMesh->mNormals[v];
+                }
+                
 
                 aiColor4D color = aiColor4D(0.f, 0.f, 0.f, 0.f);
                 if (rMesh->HasVertexColors(0))
@@ -53,7 +42,11 @@ namespace engine
                     color = rMesh->mColors[0][v];
                 }
 
-                aiVector3D texcoord = rMesh->mTextureCoords[0][v];
+                aiVector3D texcoord = aiVector3D(0.f, 0.f, 0.f);
+                if (rMesh->HasTextureCoords(0))
+                {
+                    texcoord = rMesh->mTextureCoords[0][v];
+                }
 
                 verts.push_back(Vertex(Vector3(pos.x, pos.y, pos.z), Vector3(norm.x, norm.y, norm.z), Color(color.r, color.g, color.b, color.a), Vector2(texcoord.x, 1.f - texcoord.y)));
             }
@@ -171,6 +164,53 @@ namespace engine
             delete out;
             delete scene;
             return nullptr;
+        }
+
+        return out;
+    }
+
+    engine::Model* LoadModelFromMemory(const char* ptr, size_t size, engine::Shader* shader)
+    {
+        Assimp::Importer importer;
+
+        const aiScene* scene = importer.ReadFileFromMemory(ptr, size, aiProcess_Triangulate | aiProcess_GenBoundingBoxes);
+
+        if (scene == nullptr)
+        {
+            assert(false);
+        }
+
+        Model* out = Load(scene, "", shader);
+        if (!out)
+        {
+            out = Model::errorModel;
+        }
+        return out;
+    }
+
+    engine::Model* LoadModel(const char* filename, engine::Shader* shader)
+    {
+        Model* out = nullptr;
+
+        if (std::filesystem::exists(filename))
+        {
+            Assimp::Importer importer;
+            const aiScene* scene = importer.ReadFile(filename,
+                aiProcess_Triangulate |
+                aiProcess_GenBoundingBoxes);
+
+            if (scene != nullptr)
+            {
+                out = Load(scene, filename, shader);
+            }
+        }
+
+        if (!out)
+        {
+            Shader* vertexColorShader = new Shader();
+            const wchar_t* vfile = L"shaders/vertexcolors.hlsl";
+            vertexColorShader->Load(vfile, vfile, engine::device);
+            out = LoadModelFromMemory(errorModelText, errorModelTextCount, vertexColorShader);
         }
 
         return out;

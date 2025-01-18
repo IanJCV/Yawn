@@ -136,6 +136,9 @@
       <AdditionalDependencies>
       </AdditionalDependencies>
     </Lib>
+    <PreBuildEvent>
+      <Command>call $(SolutionDir)transfer-error-files.bat</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -163,6 +166,9 @@
       <AdditionalDependencies>
       </AdditionalDependencies>
     </Lib>
+    <PreBuildEvent>
+      <Command>call $(SolutionDir)transfer-error-files.bat</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\common\include\DirectXTex\DDS.h" />
@@ -186,6 +192,7 @@
     <ClInclude Include="common.h" />
     <ClInclude Include="constant_buffer.h" />
     <ClInclude Include="engine.h" />
+    <ClInclude Include="errormodel.h" />
     <ClInclude Include="errorshader.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="globals.h" />

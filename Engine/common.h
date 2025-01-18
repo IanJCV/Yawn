@@ -41,3 +41,9 @@ ENGINE_API std::string str2lower(std::string s);
 ENGINE_API std::wstring widen(const std::string& str);
 
 ENGINE_API std::string narrow(const std::wstring& str);
+
+#define DECAY_CONSTANT 16.f
+
+ENGINE_API float smooth(float a, float b, float dt, float decay = DECAY_CONSTANT);
+
+ENGINE_API DirectX::SimpleMath::Vector3 smooth(DirectX::SimpleMath::Vector3 a, DirectX::SimpleMath::Vector3 b, float dt, float decay = DECAY_CONSTANT);

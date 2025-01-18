@@ -66,3 +66,13 @@ ENGINE_API std::string narrow(const std::wstring& str)
         stm << ctfacet.narrow(str[i], 0);
     return stm.str();
 }
+
+ENGINE_API float smooth(float a, float b, float dt, float decay)
+{
+    return b + (a - b) * exp(-decay * dt);
+}
+
+ENGINE_API DirectX::SimpleMath::Vector3 smooth(DirectX::SimpleMath::Vector3 a, DirectX::SimpleMath::Vector3 b, float dt, float decay)
+{
+    return b + (a - b) * exp(-decay * dt);
+}

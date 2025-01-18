@@ -1,2 +1,4 @@
 #define API __declspec(dllexport)
 #define API __declspec(dllimport)
+#define ENGINE_API __declspec(dllexport)
+#define ENGINE_API __declspec(dllimport)

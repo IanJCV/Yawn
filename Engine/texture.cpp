@@ -243,16 +243,7 @@ engine::CubemapTexture::CubemapTexture(std::vector<std::string> filenames)
 	ScratchImage im;
 	im.InitializeCubeFromImages(images, 6);
 
-	TexMetadata cubeMetadata;
-	cubeMetadata.arraySize = 6;
-	cubeMetadata.depth = 1;
-	cubeMetadata.dimension = TEX_DIMENSION_TEXTURE2D;
-	cubeMetadata.width = metas[0].width;
-	cubeMetadata.height = metas[0].height;
-	cubeMetadata.format = metas[0].format;
-	cubeMetadata.mipLevels = metas[0].mipLevels;
-
-	CreateShaderResourceView(device, im.GetImages(), im.GetImageCount(), cubeMetadata, &shaderResourceView);
+	CreateShaderResourceView(device, im.GetImages(), im.GetImageCount(), im.GetMetadata(), &shaderResourceView);
 }
 
 

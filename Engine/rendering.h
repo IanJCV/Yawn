@@ -16,11 +16,13 @@ namespace engine
         void SetContext(DeviceContext** context);
         void SetCamera(Camera* camera);
         void PreUpdate();
-        void DrawSkybox(CubemapTexture* texture);
+        void SetSkyTexture(CubemapTexture* texture);
+        void DrawSkybox();
 		void SubmitForRendering(Model* model, bool wireframe = false);
 
         Camera* camera;
         Shader* m_SkyboxShader;
+        CubemapTexture* sky;
 	private:
         Renderer();
 

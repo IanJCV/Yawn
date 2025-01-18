@@ -50,7 +50,10 @@ namespace engine
         void Scale(float scale);
         void Translate(DirectX::SimpleMath::Vector3 movement);
         void Rotate(DirectX::SimpleMath::Vector3 eulers);
+
+        inline static Model* errorModel;
     };
 
+    ENGINE_API engine::Model* LoadModelFromMemory(const char* ptr, size_t size, engine::Shader* shader);
     ENGINE_API engine::Model* LoadModel(const char* filename, engine::Shader* shader);
 }

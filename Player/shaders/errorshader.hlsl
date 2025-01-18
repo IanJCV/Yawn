@@ -1,3 +1,5 @@
+// hi helo
+
 cbuffer constants : register(b0)
 {
     float4x4 model;
@@ -22,7 +24,7 @@ struct vs_in
 struct vs_out
 {
     float4 positionCS : SV_Position;
-    float3 positionWS : POSITION1;
+    float3 positionWS : TEXCOORD0;
 };
 
 vs_out vs_main(vs_in input)
@@ -43,6 +45,4 @@ float4 ps_main(vs_out input) : SV_TARGET
     float3 uv = floor(2 * input.positionWS / 2);
     float a = abs((uv.x + uv.y + uv.z) % 2);
     return float4(magenta * a, 1);
-    
-    return float4(lerp(magenta, black, distance(input.positionWS, float3(0, 0, 0)) % 2), 1);
 }

@@ -143,23 +143,34 @@
     <ClInclude Include="objLoader.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="shaders\shaders.hlsl">
+    <None Include="shaders\shaders.hlsl">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</DeploymentContent>
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-    </Text>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="shaders\skybox.hlsl">
+    <None Include="shaders\skybox.hlsl">
       <FileType>Document</FileType>
-    </Text>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="shaders\errorshader.hlsl">
+    <FxCompile Include="shaders\errorshader.hlsl">
       <FileType>Document</FileType>
-    </Text>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">vs_main</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">vs_main</EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\vertexcolors.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

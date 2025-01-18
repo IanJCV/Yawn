@@ -11,12 +11,14 @@ namespace engine
 		Shader();
 
 		bool Load(const wchar_t* vsFile, const wchar_t* psFile, Device* device);
-		bool Load(std::string text, const char* name, Device* device);
+		bool Load(const char* text, size_t length, const char* name, Device* device);
 		void Reload();
 		ID3D11VertexShader* vertexShader;
 		ID3D11PixelShader* pixelShader;
 		ID3D11InputLayout* inputLayout;
-		ShaderBlob* vsBlob, * psBlob, * errorBlob;
+		ShaderBlob* vsBlob, * psBlob;
+
+		bool hadError = false;
 
 		static Shader* Find(std::string name);
 		

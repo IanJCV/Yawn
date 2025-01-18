@@ -8,8 +8,6 @@ namespace engine
 
     engine::Shader::Shader()
     {
-
-        errorBlob = nullptr;
         vsBlob = nullptr;
         psBlob = nullptr;
         inputLayout = nullptr;
@@ -17,7 +15,7 @@ namespace engine
         pixelShader = nullptr;
     }
 
-    inline bool engine::Shader::Load(std::string text, const char* name, Device* device)
+    inline bool engine::Shader::Load(const char* text, size_t length, const char* name, Device* device)
     {
         // Shader stuff
         UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
@@ -26,11 +24,12 @@ namespace engine
 #endif
 
         ShaderBlob* tempBlob = NULL;
+        ShaderBlob* errorBlob = NULL;
 
         // COMPILE VERTEX SHADER
         HRESULT hr = D3DCompile(
-            text.c_str(), 
-            text.size(), 
+            text, 
+            length, 
             "shaders/error.hlsl", 
             nullptr, 
             D3D_COMPILE_STANDARD_FILE_INCLUDE,
@@ -53,8 +52,8 @@ namespace engine
 
         // COMPILE PIXEL SHADER
         hr = D3DCompile(
-            text.c_str(),
-            text.size(),
+            text,
+            length,
             "shaders/error.hlsl",
             nullptr,
             D3D_COMPILE_STANDARD_FILE_INCLUDE,
@@ -121,12 +120,17 @@ namespace engine
         return true;
     }
 
+    inline Shader* LoadFromCompiled(const char* file, Device* device)
+    {
+        
+    }
+
     inline bool engine::Shader::Load(const wchar_t* vsFile, const wchar_t* psFile, Device* device)
     {
         if (!errorShader)
         {
             errorShader = new Shader();
-            errorShader->Load(errorShaderText, "error", device);
+            errorShader->Load(errorShaderText, errorShaderTextCount, "error", device);
         }
 
         vsName = vsFile;
@@ -143,6 +147,8 @@ namespace engine
         lastDevice = device;
 
         bool success = true;
+
+        ShaderBlob* errorBlob = nullptr;
 
         // Shader stuff
         UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
@@ -252,11 +258,6 @@ namespace engine
 
     void engine::Shader::Reload()
     {
-        if (errorBlob)
-        {
-            auto buf = errorBlob->GetBufferPointer();
-            if (buf) errorBlob->Release();
-        }
         vsBlob->Release();
         psBlob->Release();
         inputLayout->Release();

@@ -6,10 +6,11 @@
 engine::Model* car;
 engine::Model* playground;
 engine::Model* slurp;
+engine::Model* cube;
 
 engine::Shader* shader;
+
 engine::Texture* gridTexture;
-engine::CubemapTexture* skyTexture;
 
 engine::Camera* camera;
 
@@ -67,24 +68,32 @@ GameLoad TestGame::LoadResources()
     slurp->Scale(0.25f);
     slurp->Translate(Vector3(0.f, 0.f, -15.f));
 
+    engine::Shader* cubeShader = new engine::Shader();
+    cubeShader->Load(L"uh", L"erm", engine::device);
+
+    cube = engine::LoadModel("models/cube.fbx", cubeShader);
+    cube->Scale(2.f);
+    cube->Translate(Vector3(1.f, 0.f, -20.f));
+
     gridTexture = new engine::Texture("textures/grid.png");
 
     car->SetTexture(gridTexture);
     playground->SetTexture(gridTexture);
 
-    skyTexture = new engine::CubemapTexture(
-        {
-            "textures/skyboxes/thing/clouds1_rt.bmp",
-            "textures/skyboxes/thing/clouds1_lf.bmp",
-            "textures/skyboxes/thing/clouds1_up.bmp",
-            "textures/skyboxes/thing/clouds1_dn.bmp",
-            "textures/skyboxes/thing/clouds1_ft.bmp",
-            "textures/skyboxes/thing/clouds1_bk.bmp",
-        });
-
     randomSound = new engine::audio::SoundEvent("event:/e_click");
 
-    engine::Renderer::Get().SetCamera(camera);
+    engine::Renderer& rend = engine::Renderer::Get();
+
+    rend.SetCamera(camera);
+    rend.SetSkyTexture(new engine::CubemapTexture(
+        {
+            "textures/skyboxes/uhh/rt.0001.tif",
+            "textures/skyboxes/uhh/lf.0001.tif",
+            "textures/skyboxes/uhh/up.0001.tif",
+            "textures/skyboxes/uhh/dn.0001.tif",
+            "textures/skyboxes/uhh/ft.0001.tif",
+            "textures/skyboxes/uhh/bk.0001.tif",
+        }));
 
     GameLoad gl;
     gl.keyboard = &keyboard;
@@ -154,7 +163,7 @@ void TestGame::Render(engine::Renderer& rend, ImGuiContext* ctx, float dt)
 
     ImGui::SetCurrentContext(ctx);
     ImGuizmo::BeginFrame();
-    rend.DrawSkybox(skyTexture);
+    rend.DrawSkybox();
 
     if (drawCar)
     {
@@ -162,8 +171,7 @@ void TestGame::Render(engine::Renderer& rend, ImGuiContext* ctx, float dt)
     }
     rend.SubmitForRendering(playground, true);
     rend.SubmitForRendering(slurp);
-
-
+    rend.SubmitForRendering(cube);
 
     static bool open = true;
     if (ImGui::Begin("wnd", &open, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar))
