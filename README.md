@@ -1,5 +1,5 @@
 ## Overview  
-This is a simple DX11 "game framework" that I use to play around with DirectX features. It's made to be a MonoGame-like way to make basic games using C++.  
+This is a simple DX11 "game framework" that I use to play around with DirectX features. It's meant to be a MonoGame-like way to make basic games using C++.  
 
 It's built using Win32, the latest DirectX 11, Dear Imgui for UI, and FMOD for audio.
 
